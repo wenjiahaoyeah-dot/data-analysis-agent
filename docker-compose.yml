@@ -1,0 +1,79 @@
+services:
+  postgres:
+    # 国内网络下 Docker Hub 常常超时，可用环境变量换成镜像源：
+    #   POSTGRES_IMAGE=docker.m.daocloud.io/library/postgres:16 docker compose up
+    image: ${POSTGRES_IMAGE:-postgres:16}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-daa}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-daa}
+      POSTGRES_DB: ${POSTGRES_DB:-daa}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-daa}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    command: >
+      sh -c 'case "$$REPOSITORY_BACKEND" in postgres|postgresql|pg)
+      python scripts/init_db.py || exit $$?;; esac;
+      exec uvicorn app.main:app --host 0.0.0.0 --port 8000'
+    ports:
+      - "127.0.0.1:${API_PORT:-8000}:8000"
+    environment:
+      # 控制面：postgres 走数据库，json 走本地文件
+      REPOSITORY_BACKEND: ${REPOSITORY_BACKEND:-postgres}
+      POSTGRES_DSN: postgresql://${POSTGRES_USER:-daa}:${POSTGRES_PASSWORD:-daa}@postgres:5432/${POSTGRES_DB:-daa}
+      POSTGRES_SCHEMA: ${POSTGRES_SCHEMA:-public}
+      # 模型不可用时明确报错，不使用规则引擎冒充真实模型
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.deepseek.com}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-deepseek-flash}
+      USE_MOCK_LLM: ${USE_MOCK_LLM:-false}
+      SQL_TIMEOUT_SECONDS: ${SQL_TIMEOUT_SECONDS:-15}
+      MAX_RESULT_ROWS: ${MAX_RESULT_ROWS:-500}
+      AGENT_MAX_TOOL_CALLS: ${AGENT_MAX_TOOL_CALLS:-10}
+      AGENT_MAX_SQL_CALLS: ${AGENT_MAX_SQL_CALLS:-4}
+      AGENT_MAX_MODEL_CALLS: ${AGENT_MAX_MODEL_CALLS:-8}
+      AGENT_TIMEOUT_SECONDS: ${AGENT_TIMEOUT_SECONDS:-150}
+      METRICS_ENABLED: ${METRICS_ENABLED:-true}
+      AUDIT_ENABLED: ${AUDIT_ENABLED:-true}
+      REQUIRE_API_KEY: ${REQUIRE_API_KEY:-false}
+      API_KEYS: ${API_KEYS:-${API_KEY:-}}
+    volumes:
+      # 只持久化数据面（DuckDB 文件）与任务产物，元信息已经在 postgres 里
+      - ${HOST_STORAGE_DIR:-./storage}:/app/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8000/api/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  frontend:
+    build: .
+    command: >
+      streamlit run frontend/streamlit_app.py
+      --server.port 8501
+      --server.address 0.0.0.0
+      --server.headless true
+      --browser.gatherUsageStats false
+    ports:
+      - "127.0.0.1:${WEB_PORT:-8501}:8501"
+    environment:
+      API_BASE_URL: http://api:8000
+      API_KEY: ${API_KEY:-}
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  pgdata:
