@@ -1,0 +1,1606 @@
+{
+  "summary": {
+    "engine": "openai-compatible",
+    "model": "deepseek-flash",
+    "evaluated_at_utc": "2026-10-31T18:18:11.726787+00:00",
+    "dataset_id": "dc86cf2d82f4",
+    "dataset_sha256": "c88ce32a8db55e28200f95a91efffe2fd40df1349dca80ae2a15552dbe1b10d2",
+    "comparison": "完整行多重集（列按位置比较）",
+    "fallback_to_mock": false,
+    "total_cases": 30,
+    "sql_generation_rate": 1.0,
+    "sql_execution_rate": 0.9667,
+    "result_accuracy": 0.7667,
+    "avg_elapsed_ms": 4895.9,
+    "p95_elapsed_ms": 8447.4,
+    "auto_repair_triggered": 0,
+    "security_total": 6,
+    "security_blocked": 6,
+    "security_block_rate": 1.0,
+    "by_category": {
+      "基础聚合": {
+        "total": 10,
+        "correct": 9
+      },
+      "多维度分析": {
+        "total": 10,
+        "correct": 7
+      },
+      "时间与复杂查询": {
+        "total": 5,
+        "correct": 2
+      },
+      "边界与异常": {
+        "total": 5,
+        "correct": 5
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": 1,
+      "category": "基础聚合",
+      "question": "总销售额是多少？",
+      "sql": "SELECT ROUND(SUM(amount), 2) AS total_sales FROM demo_sales",
+      "reference_sql": "SELECT ROUND(SUM(amount), 2) AS total_sales FROM demo_sales",
+      "reference_rows": [
+        [
+          1499739.94
+        ]
+      ],
+      "actual_rows": [
+        [
+          1499739.94
+        ]
+      ],
+      "status": "success",
+      "row_count": 1,
+      "retry_count": 0,
+      "correct": true,
+      "elapsed_ms": 4687.3,
+      "detail": "",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 2,
+      "category": "基础聚合",
+      "question": "一共有多少笔订单？",
+      "sql": "SELECT COUNT(DISTINCT order_id) AS order_count FROM demo_sales",
+      "reference_sql": "SELECT COUNT(*) AS order_count FROM demo_sales",
+      "reference_rows": [
+        [
+          1691
+        ]
+      ],
+      "actual_rows": [
+        [
+          1690
+        ]
+      ],
+      "status": "success",
+      "row_count": 1,
+      "retry_count": 0,
+      "correct": false,
+      "elapsed_ms": 3909.5,
+      "detail": "期望 [[1691]] / 实际 [[1690]]",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 3,
+      "category": "基础聚合",
+      "question": "总销量是多少件？",
+      "sql": "SELECT SUM(quantity) AS total_units_sold FROM demo_sales",
+      "reference_sql": "SELECT SUM(quantity) AS total_quantity FROM demo_sales",
+      "reference_rows": [
+        [
+          3921
+        ]
+      ],
+      "actual_rows": [
+        [
+          3921
+        ]
+      ],
+      "status": "success",
+      "row_count": 1,
+      "retry_count": 0,
+      "correct": true,
+      "elapsed_ms": 4164.6,
+      "detail": "",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 4,
+      "category": "基础聚合",
+      "question": "平均每笔订单的金额是多少？",
+      "sql": "SELECT ROUND(AVG(amount), 2) AS avg_order_amount FROM demo_sales",
+      "reference_sql": "SELECT ROUND(AVG(amount), 2) AS avg_order_value FROM demo_sales",
+      "reference_rows": [
+        [
+          886.9
+        ]
+      ],
+      "actual_rows": [
+        [
+          886.9
+        ]
+      ],
+      "status": "success",
+      "row_count": 1,
+      "retry_count": 0,
+      "correct": true,
+      "elapsed_ms": 5370.4,
+      "detail": "",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 5,
+      "category": "基础聚合",
+      "question": "一共有多少个不同的客户？",
+      "sql": "SELECT COUNT(DISTINCT customer_id) AS customer_count FROM demo_sales",
+      "reference_sql": "SELECT COUNT(DISTINCT customer_id) AS customer_count FROM demo_sales",
+      "reference_rows": [
+        [
+          1359
+        ]
+      ],
+      "actual_rows": [
+        [
+          1359
+        ]
+      ],
+      "status": "success",
+      "row_count": 1,
+      "retry_count": 0,
+      "correct": true,
+      "elapsed_ms": 3826.5,
+      "detail": "",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 6,
+      "category": "基础聚合",
+      "question": "销售额最高的单笔订单金额是多少？",
+      "sql": "SELECT ROUND(MAX(amount), 2) AS max_order_amount FROM demo_sales",
+      "reference_sql": "SELECT ROUND(MAX(amount), 2) AS max_amount FROM demo_sales",
+      "reference_rows": [
+        [
+          14394.0
+        ]
+      ],
+      "actual_rows": [
+        [
+          14394.0
+        ]
+      ],
+      "status": "success",
+      "row_count": 1,
+      "retry_count": 0,
+      "correct": true,
+      "elapsed_ms": 4027.0,
+      "detail": "",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 7,
+      "category": "基础聚合",
+      "question": "一共有多少种不同的商品？",
+      "sql": "SELECT COUNT(DISTINCT product) AS product_count FROM demo_sales",
+      "reference_sql": "SELECT COUNT(DISTINCT product) AS product_count FROM demo_sales",
+      "reference_rows": [
+        [
+          20
+        ]
+      ],
+      "actual_rows": [
+        [
+          20
+        ]
+      ],
+      "status": "success",
+      "row_count": 1,
+      "retry_count": 0,
+      "correct": true,
+      "elapsed_ms": 3953.1,
+      "detail": "",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 8,
+      "category": "基础聚合",
+      "question": "所有订单的商品数量平均值是多少？",
+      "sql": "SELECT ROUND(AVG(quantity), 2) AS avg_quantity FROM demo_sales",
+      "reference_sql": "SELECT ROUND(AVG(quantity), 2) AS avg_quantity FROM demo_sales",
+      "reference_rows": [
+        [
+          2.32
+        ]
+      ],
+      "actual_rows": [
+        [
+          2.32
+        ]
+      ],
+      "status": "success",
+      "row_count": 1,
+      "retry_count": 0,
+      "correct": true,
+      "elapsed_ms": 4187.2,
+      "detail": "",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 9,
+      "category": "基础聚合",
+      "question": "一共有几个销售区域？",
+      "sql": "SELECT COUNT(DISTINCT region) AS region_count FROM demo_sales",
+      "reference_sql": "SELECT COUNT(DISTINCT region) AS region_count FROM demo_sales",
+      "reference_rows": [
+        [
+          7
+        ]
+      ],
+      "actual_rows": [
+        [
+          7
+        ]
+      ],
+      "status": "success",
+      "row_count": 1,
+      "retry_count": 0,
+      "correct": true,
+      "elapsed_ms": 3871.8,
+      "detail": "",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 10,
+      "category": "基础聚合",
+      "question": "最低的商品成交单价是多少？",
+      "sql": "SELECT ROUND(MIN(unit_price), 2) AS min_unit_price FROM demo_sales",
+      "reference_sql": "SELECT ROUND(MIN(unit_price), 2) AS min_price FROM demo_sales",
+      "reference_rows": [
+        [
+          26.1
+        ]
+      ],
+      "actual_rows": [
+        [
+          26.1
+        ]
+      ],
+      "status": "success",
+      "row_count": 1,
+      "retry_count": 0,
+      "correct": true,
+      "elapsed_ms": 4162.2,
+      "detail": "",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 11,
+      "category": "多维度分析",
+      "question": "各地区的销售额分别是多少？",
+      "sql": "SELECT region, ROUND(SUM(amount), 2) AS total_sales FROM demo_sales GROUP BY region ORDER BY total_sales DESC",
+      "reference_sql": "SELECT region, ROUND(SUM(amount), 2) AS total_sales FROM demo_sales GROUP BY region ORDER BY total_sales DESC",
+      "reference_rows": [
+        [
+          "华东",
+          434296.44
+        ],
+        [
+          "华南",
+          338943.34
+        ],
+        [
+          "华北",
+          289336.88
+        ],
+        [
+          "华中",
+          187211.86
+        ],
+        [
+          "西南",
+          120343.74
+        ],
+        [
+          "西北",
+          69892.97
+        ],
+        [
+          "东北",
+          59714.71
+        ]
+      ],
+      "actual_rows": [
+        [
+          "华东",
+          434296.44
+        ],
+        [
+          "华南",
+          338943.34
+        ],
+        [
+          "华北",
+          289336.88
+        ],
+        [
+          "华中",
+          187211.86
+        ],
+        [
+          "西南",
+          120343.74
+        ],
+        [
+          "西北",
+          69892.97
+        ],
+        [
+          "东北",
+          59714.71
+        ]
+      ],
+      "status": "success",
+      "row_count": 7,
+      "retry_count": 0,
+      "correct": true,
+      "elapsed_ms": 4555.6,
+      "detail": "",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 12,
+      "category": "多维度分析",
+      "question": "各销售渠道的销售额是多少？",
+      "sql": "SELECT channel, ROUND(SUM(amount), 2) AS total_sales FROM demo_sales GROUP BY channel ORDER BY total_sales DESC",
+      "reference_sql": "SELECT channel, ROUND(SUM(amount), 2) AS total_sales FROM demo_sales GROUP BY channel ORDER BY total_sales DESC",
+      "reference_rows": [
+        [
+          "天猫",
+          543300.25
+        ],
+        [
+          "京东",
+          450610.59
+        ],
+        [
+          "抖音",
+          312731.1
+        ],
+        [
+          "官网",
+          193098.0
+        ]
+      ],
+      "actual_rows": [
+        [
+          "天猫",
+          543300.25
+        ],
+        [
+          "京东",
+          450610.59
+        ],
+        [
+          "抖音",
+          312731.1
+        ],
+        [
+          "官网",
+          193098.0
+        ]
+      ],
+      "status": "success",
+      "row_count": 4,
+      "retry_count": 0,
+      "correct": true,
+      "elapsed_ms": 3907.5,
+      "detail": "",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 13,
+      "category": "多维度分析",
+      "question": "各类目的订单量是多少？",
+      "sql": "SELECT category, COUNT(DISTINCT order_id) AS order_count FROM demo_sales GROUP BY category ORDER BY order_count DESC",
+      "reference_sql": "SELECT category, COUNT(*) AS order_count FROM demo_sales GROUP BY category ORDER BY order_count DESC",
+      "reference_rows": [
+        [
+          "数码配件",
+          846
+        ],
+        [
+          "智能家居",
+          263
+        ],
+        [
+          "生活百货",
+          218
+        ],
+        [
+          "个护健康",
+          191
+        ],
+        [
+          "智能穿戴",
+          173
+        ]
+      ],
+      "actual_rows": [
+        [
+          "数码配件",
+          846
+        ],
+        [
+          "智能家居",
+          263
+        ],
+        [
+          "生活百货",
+          217
+        ],
+        [
+          "个护健康",
+          191
+        ],
+        [
+          "智能穿戴",
+          173
+        ]
+      ],
+      "status": "success",
+      "row_count": 5,
+      "retry_count": 0,
+      "correct": false,
+      "elapsed_ms": 4723.5,
+      "detail": "期望 [['数码配件', 846], ['智能家居', 263], ['生活百货', 218], ['个护健康', 191], ['智能穿戴', 173]] / 实际 [['数码配件', 846], ['智能家居', 263], ['生活百货', 217], ['个护健康', 191], ['智能穿戴', 173]]",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 14,
+      "category": "多维度分析",
+      "question": "销量排名前五的商品是哪几个？",
+      "sql": "SELECT product, SUM(quantity) AS total_quantity FROM demo_sales GROUP BY product ORDER BY total_quantity DESC LIMIT 5",
+      "reference_sql": "SELECT product, SUM(quantity) AS total_quantity FROM demo_sales GROUP BY product ORDER BY total_quantity DESC LIMIT 5",
+      "reference_rows": [
+        [
+          "便携充电宝",
+          361
+        ],
+        [
+          "机械键盘",
+          341
+        ],
+        [
+          "无线蓝牙耳机",
+          317
+        ],
+        [
+          "USB-C 数据线",
+          310
+        ],
+        [
+          "运动手环",
+          247
+        ]
+      ],
+      "actual_rows": [
+        [
+          "便携充电宝",
+          361
+        ],
+        [
+          "机械键盘",
+          341
+        ],
+        [
+          "无线蓝牙耳机",
+          317
+        ],
+        [
+          "USB-C 数据线",
+          310
+        ],
+        [
+          "运动手环",
+          247
+        ]
+      ],
+      "status": "success",
+      "row_count": 5,
+      "retry_count": 0,
+      "correct": true,
+      "elapsed_ms": 4181.9,
+      "detail": "",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 15,
+      "category": "多维度分析",
+      "question": "哪个地区的销售额最高？",
+      "sql": "SELECT region, ROUND(SUM(amount), 2) AS total_sales FROM demo_sales GROUP BY region ORDER BY total_sales DESC LIMIT 1",
+      "reference_sql": "SELECT region, ROUND(SUM(amount), 2) AS total_sales FROM demo_sales GROUP BY region ORDER BY total_sales DESC LIMIT 1",
+      "reference_rows": [
+        [
+          "华东",
+          434296.44
+        ]
+      ],
+      "actual_rows": [
+        [
+          "华东",
+          434296.44
+        ]
+      ],
+      "status": "success",
+      "row_count": 1,
+      "retry_count": 0,
+      "correct": true,
+      "elapsed_ms": 4373.9,
+      "detail": "",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 16,
+      "category": "多维度分析",
+      "question": "各地区平均每笔订单的金额是多少？",
+      "sql": "SELECT region, ROUND(AVG(amount), 2) AS avg_order_amount FROM demo_sales GROUP BY region ORDER BY avg_order_amount DESC",
+      "reference_sql": "SELECT region, ROUND(AVG(amount), 2) AS avg_amount FROM demo_sales GROUP BY region ORDER BY avg_amount DESC",
+      "reference_rows": [
+        [
+          "西南",
+          978.4
+        ],
+        [
+          "华北",
+          954.91
+        ],
+        [
+          "华东",
+          902.9
+        ],
+        [
+          "东北",
+          865.43
+        ],
+        [
+          "华中",
+          850.96
+        ],
+        [
+          "西北",
+          832.06
+        ],
+        [
+          "华南",
+          824.68
+        ]
+      ],
+      "actual_rows": [
+        [
+          "西南",
+          978.4
+        ],
+        [
+          "华北",
+          954.91
+        ],
+        [
+          "华东",
+          902.9
+        ],
+        [
+          "东北",
+          865.43
+        ],
+        [
+          "华中",
+          850.96
+        ],
+        [
+          "西北",
+          832.06
+        ],
+        [
+          "华南",
+          824.68
+        ]
+      ],
+      "status": "success",
+      "row_count": 7,
+      "retry_count": 0,
+      "correct": true,
+      "elapsed_ms": 4694.0,
+      "detail": "",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 17,
+      "category": "多维度分析",
+      "question": "各渠道分别有多少笔订单？",
+      "sql": "SELECT channel, COUNT(DISTINCT order_id) AS order_count FROM demo_sales GROUP BY channel ORDER BY order_count DESC",
+      "reference_sql": "SELECT channel, COUNT(*) AS order_count FROM demo_sales GROUP BY channel ORDER BY order_count DESC",
+      "reference_rows": [
+        [
+          "天猫",
+          631
+        ],
+        [
+          "京东",
+          505
+        ],
+        [
+          "抖音",
+          381
+        ],
+        [
+          "官网",
+          174
+        ]
+      ],
+      "actual_rows": [
+        [
+          "天猫",
+          630
+        ],
+        [
+          "京东",
+          505
+        ],
+        [
+          "抖音",
+          381
+        ],
+        [
+          "官网",
+          174
+        ]
+      ],
+      "status": "success",
+      "row_count": 4,
+      "retry_count": 0,
+      "correct": false,
+      "elapsed_ms": 3472.8,
+      "detail": "期望 [['天猫', 631], ['京东', 505], ['抖音', 381], ['官网', 174]] / 实际 [['天猫', 630], ['京东', 505], ['抖音', 381], ['官网', 174]]",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 18,
+      "category": "多维度分析",
+      "question": "各类目的销售额占比是多少？",
+      "sql": "SELECT category, ROUND(SUM(amount), 2) AS total_sales, ROUND(SUM(amount) * 100.0 / SUM(SUM(amount)) OVER (), 2) AS sales_share_pct FROM demo_sales GROUP BY category ORDER BY total_sales DESC",
+      "reference_sql": "SELECT category, ROUND(SUM(amount) * 100.0 / (SELECT SUM(amount) FROM demo_sales), 2) AS pct FROM demo_sales GROUP BY category ORDER BY pct DESC",
+      "reference_rows": [
+        [
+          "智能家居",
+          34.83
+        ],
+        [
+          "数码配件",
+          33.67
+        ],
+        [
+          "智能穿戴",
+          15.37
+        ],
+        [
+          "个护健康",
+          12.19
+        ],
+        [
+          "生活百货",
+          3.94
+        ]
+      ],
+      "actual_rows": [
+        [
+          "智能家居",
+          522390.27,
+          34.83
+        ],
+        [
+          "数码配件",
+          504983.65,
+          33.67
+        ],
+        [
+          "智能穿戴",
+          230440.08,
+          15.37
+        ],
+        [
+          "个护健康",
+          182839.47,
+          12.19
+        ],
+        [
+          "生活百货",
+          59086.47,
+          3.94
+        ]
+      ],
+      "status": "success",
+      "row_count": 5,
+      "retry_count": 0,
+      "correct": false,
+      "elapsed_ms": 4391.2,
+      "detail": "期望 [['智能家居', 34.83], ['数码配件', 33.67], ['智能穿戴', 15.37], ['个护健康', 12.19], ['生活百货', 3.94]] / 实际 [['智能家居', 522390.27, 34.83], ['数码配件', 504983.65, 33.67], ['智能穿戴', 230440.08, 15.37], ['个护健康', 182839.47, 12.19], ['生活百货', 59086.47, 3.94]]",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 19,
+      "category": "多维度分析",
+      "question": "哪个商品的销量最高？",
+      "sql": "SELECT product, ROUND(SUM(quantity), 2) AS total_quantity FROM demo_sales GROUP BY product ORDER BY total_quantity DESC LIMIT 1",
+      "reference_sql": "SELECT product, SUM(quantity) AS total_quantity FROM demo_sales GROUP BY product ORDER BY total_quantity DESC LIMIT 1",
+      "reference_rows": [
+        [
+          "便携充电宝",
+          361
+        ]
+      ],
+      "actual_rows": [
+        [
+          "便携充电宝",
+          361
+        ]
+      ],
+      "status": "success",
+      "row_count": 1,
+      "retry_count": 0,
+      "correct": true,
+      "elapsed_ms": 4364.8,
+      "detail": "",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 20,
+      "category": "多维度分析",
+      "question": "各地区分别有多少个不同的客户？",
+      "sql": "SELECT region, COUNT(DISTINCT customer_id) AS customer_count FROM demo_sales GROUP BY region ORDER BY customer_count DESC",
+      "reference_sql": "SELECT region, COUNT(DISTINCT customer_id) AS customer_count FROM demo_sales GROUP BY region ORDER BY customer_count DESC",
+      "reference_rows": [
+        [
+          "华东",
+          455
+        ],
+        [
+          "华南",
+          390
+        ],
+        [
+          "华北",
+          284
+        ],
+        [
+          "华中",
+          213
+        ],
+        [
+          "西南",
+          120
+        ],
+        [
+          "西北",
+          83
+        ],
+        [
+          "东北",
+          68
+        ]
+      ],
+      "actual_rows": [
+        [
+          "华东",
+          455
+        ],
+        [
+          "华南",
+          390
+        ],
+        [
+          "华北",
+          284
+        ],
+        [
+          "华中",
+          213
+        ],
+        [
+          "西南",
+          120
+        ],
+        [
+          "西北",
+          83
+        ],
+        [
+          "东北",
+          68
+        ]
+      ],
+      "status": "success",
+      "row_count": 7,
+      "retry_count": 0,
+      "correct": true,
+      "elapsed_ms": 3760.8,
+      "detail": "",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 21,
+      "category": "时间与复杂查询",
+      "question": "最近三个月每个月的销售额是多少？",
+      "sql": "SELECT strftime(order_date, '%Y-%m') AS month, ROUND(SUM(amount), 2) AS total_sales FROM demo_sales WHERE order_date >= date_trunc('month', (SELECT MAX(order_date) FROM demo_sales)) - INTERVAL 2 MONTH GROUP BY month ORDER BY month",
+      "reference_sql": "SELECT strftime(order_date, '%Y-%m') AS month, ROUND(SUM(amount), 2) AS total_sales FROM demo_sales WHERE order_date >= (SELECT MAX(order_date) FROM demo_sales) - INTERVAL 3 MONTH GROUP BY month ORDER BY month",
+      "reference_rows": [
+        [
+          "2026-07",
+          4656.43
+        ],
+        [
+          "2026-08",
+          226133.68
+        ],
+        [
+          "2026-09",
+          169673.93
+        ],
+        [
+          "2026-10",
+          241897.48
+        ]
+      ],
+      "actual_rows": [
+        [
+          "2026-08",
+          226133.68
+        ],
+        [
+          "2026-09",
+          169673.93
+        ],
+        [
+          "2026-10",
+          241897.48
+        ]
+      ],
+      "status": "success",
+      "row_count": 3,
+      "retry_count": 0,
+      "correct": false,
+      "elapsed_ms": 11013.3,
+      "detail": "期望 [['2026-07', 4656.43], ['2026-08', 226133.68], ['2026-09', 169673.93], ['2026-10', 241897.48]] / 实际 [['2026-08', 226133.68], ['2026-09', 169673.93], ['2026-10', 241897.48]]",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 22,
+      "category": "时间与复杂查询",
+      "question": "每个月的销售额趋势是怎样的？",
+      "sql": "SELECT strftime(order_date, '%Y-%m') AS month, ROUND(SUM(amount), 2) AS total_sales FROM demo_sales GROUP BY month ORDER BY month",
+      "reference_sql": "SELECT strftime(order_date, '%Y-%m') AS month, ROUND(SUM(amount), 2) AS total_sales FROM demo_sales GROUP BY month ORDER BY month",
+      "reference_rows": [
+        [
+          "2026-05",
+          275774.86
+        ],
+        [
+          "2026-06",
+          371710.04
+        ],
+        [
+          "2026-07",
+          214549.95
+        ],
+        [
+          "2026-08",
+          226133.68
+        ],
+        [
+          "2026-09",
+          169673.93
+        ],
+        [
+          "2026-10",
+          241897.48
+        ]
+      ],
+      "actual_rows": [
+        [
+          "2026-05",
+          275774.86
+        ],
+        [
+          "2026-06",
+          371710.04
+        ],
+        [
+          "2026-07",
+          214549.95
+        ],
+        [
+          "2026-08",
+          226133.68
+        ],
+        [
+          "2026-09",
+          169673.93
+        ],
+        [
+          "2026-10",
+          241897.48
+        ]
+      ],
+      "status": "success",
+      "row_count": 6,
+      "retry_count": 0,
+      "correct": true,
+      "elapsed_ms": 4672.6,
+      "detail": "",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 23,
+      "category": "时间与复杂查询",
+      "question": "华东地区各商品的销售额是多少？",
+      "sql": "SELECT product, ROUND(SUM(amount), 2) AS total_sales FROM demo_sales WHERE region = '华东' GROUP BY product ORDER BY total_sales DESC",
+      "reference_sql": "SELECT product, ROUND(SUM(amount), 2) AS total_sales FROM demo_sales WHERE region = '华东' GROUP BY product ORDER BY total_sales DESC",
+      "reference_rows": [
+        [
+          "扫地机器人",
+          83365.25
+        ],
+        [
+          "空气净化器",
+          57611.97
+        ],
+        [
+          "智能手表",
+          47136.11
+        ],
+        [
+          "机械键盘",
+          41052.96
+        ],
+        [
+          "降噪头戴耳机",
+          38018.71
+        ],
+        [
+          "无线蓝牙耳机",
+          23005.06
+        ],
+        [
+          "智能音箱",
+          19535.04
+        ],
+        [
+          "运动手环",
+          17721.72
+        ],
+        [
+          "筋膜枪",
+          17311.1
+        ],
+        [
+          "游戏手柄",
+          15397.2
+        ],
+        [
+          "颈椎按摩仪",
+          15045.03
+        ],
+        [
+          "便携充电宝",
+          14542.14
+        ],
+        [
+          "电动牙刷",
+          13611.0
+        ],
+        [
+          "护眼台灯",
+          8711.82
+        ],
+        [
+          "保温杯",
+          5946.9
+        ],
+        [
+          "平板保护壳",
+          5108.6
+        ],
+        [
+          "智能灯泡",
+          3779.36
+        ],
+        [
+          "桌面收纳盒",
+          3607.32
+        ],
+        [
+          "USB-C 数据线",
+          2283.75
+        ],
+        [
+          "手机支架",
+          1505.4
+        ]
+      ],
+      "actual_rows": [
+        [
+          "扫地机器人",
+          83365.25
+        ],
+        [
+          "空气净化器",
+          57611.97
+        ],
+        [
+          "智能手表",
+          47136.11
+        ],
+        [
+          "机械键盘",
+          41052.96
+        ],
+        [
+          "降噪头戴耳机",
+          38018.71
+        ],
+        [
+          "无线蓝牙耳机",
+          23005.06
+        ],
+        [
+          "智能音箱",
+          19535.04
+        ],
+        [
+          "运动手环",
+          17721.72
+        ],
+        [
+          "筋膜枪",
+          17311.1
+        ],
+        [
+          "游戏手柄",
+          15397.2
+        ],
+        [
+          "颈椎按摩仪",
+          15045.03
+        ],
+        [
+          "便携充电宝",
+          14542.14
+        ],
+        [
+          "电动牙刷",
+          13611.0
+        ],
+        [
+          "护眼台灯",
+          8711.82
+        ],
+        [
+          "保温杯",
+          5946.9
+        ],
+        [
+          "平板保护壳",
+          5108.6
+        ],
+        [
+          "智能灯泡",
+          3779.36
+        ],
+        [
+          "桌面收纳盒",
+          3607.32
+        ],
+        [
+          "USB-C 数据线",
+          2283.75
+        ],
+        [
+          "手机支架",
+          1505.4
+        ]
+      ],
+      "status": "success",
+      "row_count": 20,
+      "retry_count": 0,
+      "correct": true,
+      "elapsed_ms": 5968.0,
+      "detail": "",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 24,
+      "category": "时间与复杂查询",
+      "question": "哪些商品的累计销售额超过了平均值？",
+      "sql": "WITH product_sales AS (\n  SELECT product, SUM(amount) AS total_sales\n  FROM demo_sales\n  GROUP BY product\n),\nstats AS (\n  SELECT AVG(total_sales) AS avg_sales FROM product_sales\n)\nSELECT\n  p.product,\n  ROUND(p.total_sales, 2) AS total_sales,\n  ROUND(p.total_sales - s.avg_sales, 2) AS diff_vs_avg,\n  ROUND((p.total_sales - s.avg_sales) / s.avg_sales * 100, 2) AS diff_pct\nFROM product_sales p\nCROSS JOIN stats s\nWHERE p.total_sales > s.avg_sales\nORDER BY total_sales DESC",
+      "reference_sql": "SELECT product, ROUND(SUM(amount), 2) AS total_sales FROM demo_sales GROUP BY product HAVING SUM(amount) > (SELECT AVG(product_total) FROM (SELECT SUM(amount) AS product_total FROM demo_sales GROUP BY product)) ORDER BY total_sales DESC",
+      "reference_rows": [
+        [
+          "扫地机器人",
+          255733.4
+        ],
+        [
+          "空气净化器",
+          176673.51
+        ],
+        [
+          "智能手表",
+          167026.02
+        ],
+        [
+          "机械键盘",
+          148610.43
+        ],
+        [
+          "降噪头戴耳机",
+          125877.98
+        ],
+        [
+          "无线蓝牙耳机",
+          90043.85
+        ],
+        [
+          "智能音箱",
+          77146.65
+        ]
+      ],
+      "actual_rows": [
+        [
+          "扫地机器人",
+          255733.4,
+          180746.4,
+          241.04
+        ],
+        [
+          "空气净化器",
+          176673.51,
+          101686.51,
+          135.61
+        ],
+        [
+          "智能手表",
+          167026.02,
+          92039.02,
+          122.74
+        ],
+        [
+          "机械键盘",
+          148610.43,
+          73623.43,
+          98.18
+        ],
+        [
+          "降噪头戴耳机",
+          125877.98,
+          50890.98,
+          67.87
+        ],
+        [
+          "无线蓝牙耳机",
+          90043.85,
+          15056.85,
+          20.08
+        ],
+        [
+          "智能音箱",
+          77146.65,
+          2159.65,
+          2.88
+        ]
+      ],
+      "status": "success",
+      "row_count": 7,
+      "retry_count": 0,
+      "correct": false,
+      "elapsed_ms": 6779.1,
+      "detail": "期望 [['扫地机器人', 255733.4], ['空气净化器', 176673.51], ['智能手表', 167026.02], ['机械键盘', 148610.43], ['降噪头戴耳机', 125877.98], ['无线蓝牙耳机', 90043.85]] / 实际 [['扫地机器人', 255733.4, 180746.4, 241.04], ['空气净化器', 176673.51, 101686.51, 135.61], ['智能手表', 167026.02, 92039.02, 122.74], ['机械键盘', 148610.43, 73623.43, 98.18], ['降噪头戴耳机', 125877.98, 50890.98, 67.87], ['无线蓝牙耳机', 90043.85, 15056.85, 20.08]]",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 25,
+      "category": "时间与复杂查询",
+      "question": "每个月的订单量和销售额分别是多少？",
+      "sql": "SELECT strftime(order_date, '%Y-%m') AS month, COUNT(DISTINCT order_id) AS order_count, ROUND(SUM(amount), 2) AS total_sales FROM demo_sales GROUP BY strftime(order_date, '%Y-%m') ORDER BY month",
+      "reference_sql": "SELECT strftime(order_date, '%Y-%m') AS month, COUNT(*) AS order_count, ROUND(SUM(amount), 2) AS total_sales FROM demo_sales GROUP BY month ORDER BY month",
+      "reference_rows": [
+        [
+          "2026-05",
+          282,
+          275774.86
+        ],
+        [
+          "2026-06",
+          389,
+          371710.04
+        ],
+        [
+          "2026-07",
+          262,
+          214549.95
+        ],
+        [
+          "2026-08",
+          248,
+          226133.68
+        ],
+        [
+          "2026-09",
+          217,
+          169673.93
+        ],
+        [
+          "2026-10",
+          293,
+          241897.48
+        ]
+      ],
+      "actual_rows": [
+        [
+          "2026-05",
+          281,
+          275774.86
+        ],
+        [
+          "2026-06",
+          389,
+          371710.04
+        ],
+        [
+          "2026-07",
+          262,
+          214549.95
+        ],
+        [
+          "2026-08",
+          248,
+          226133.68
+        ],
+        [
+          "2026-09",
+          217,
+          169673.93
+        ],
+        [
+          "2026-10",
+          293,
+          241897.48
+        ]
+      ],
+      "status": "success",
+      "row_count": 6,
+      "retry_count": 0,
+      "correct": false,
+      "elapsed_ms": 8447.4,
+      "detail": "期望 [['2026-05', 282, 275774.86], ['2026-06', 389, 371710.04], ['2026-07', 262, 214549.95], ['2026-08', 248, 226133.68], ['2026-09', 217, 169673.93], ['2026-10', 293, 241897.48]] / 实际 [['2026-05', 281, 275774.86], ['2026-06', 389, 371710.04], ['2026-07', 262, 214549.95], ['2026-08', 248, 226133.68], ['2026-09', 217, 169673.93], ['2026-10', 293, 241897.48]]",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 26,
+      "category": "边界与异常",
+      "question": "销售额最高的前三个地区是哪几个？",
+      "sql": "SELECT region, ROUND(SUM(amount), 2) AS total_sales FROM demo_sales GROUP BY region ORDER BY total_sales DESC LIMIT 3",
+      "reference_sql": "SELECT region, ROUND(SUM(amount), 2) AS total_sales FROM demo_sales GROUP BY region ORDER BY total_sales DESC LIMIT 3",
+      "reference_rows": [
+        [
+          "华东",
+          434296.44
+        ],
+        [
+          "华南",
+          338943.34
+        ],
+        [
+          "华北",
+          289336.88
+        ]
+      ],
+      "actual_rows": [
+        [
+          "华东",
+          434296.44
+        ],
+        [
+          "华南",
+          338943.34
+        ],
+        [
+          "华北",
+          289336.88
+        ]
+      ],
+      "status": "success",
+      "row_count": 3,
+      "retry_count": 0,
+      "correct": true,
+      "elapsed_ms": 4228.1,
+      "detail": "",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 27,
+      "category": "边界与异常",
+      "question": "销量最低的三个商品是哪几个？",
+      "sql": "SELECT product, ROUND(SUM(quantity), 2) AS total_quantity FROM demo_sales GROUP BY product ORDER BY total_quantity ASC LIMIT 3",
+      "reference_sql": "SELECT product, SUM(quantity) AS total_quantity FROM demo_sales GROUP BY product ORDER BY total_quantity ASC LIMIT 3",
+      "reference_rows": [
+        [
+          "护眼台灯",
+          107
+        ],
+        [
+          "扫地机器人",
+          111
+        ],
+        [
+          "空气净化器",
+          118
+        ]
+      ],
+      "actual_rows": [
+        [
+          "护眼台灯",
+          107
+        ],
+        [
+          "扫地机器人",
+          111
+        ],
+        [
+          "空气净化器",
+          118
+        ]
+      ],
+      "status": "success",
+      "row_count": 3,
+      "retry_count": 0,
+      "correct": true,
+      "elapsed_ms": 4436.7,
+      "detail": "",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 28,
+      "category": "边界与异常",
+      "question": "2026 年 6 月的销售额是多少？",
+      "sql": "SELECT ROUND(SUM(amount), 2) AS total_sales FROM demo_sales WHERE order_date >= DATE '2026-06-01' AND order_date < DATE '2026-07-01'",
+      "reference_sql": "SELECT ROUND(SUM(amount), 2) AS total_sales FROM demo_sales WHERE order_date >= DATE '2026-06-01' AND order_date < DATE '2026-07-01'",
+      "reference_rows": [
+        [
+          371710.04
+        ]
+      ],
+      "actual_rows": [
+        [
+          371710.04
+        ]
+      ],
+      "status": "success",
+      "row_count": 1,
+      "retry_count": 0,
+      "correct": true,
+      "elapsed_ms": 5272.1,
+      "detail": "",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 29,
+      "category": "边界与异常",
+      "question": "华东和华南两个地区的销售额对比",
+      "sql": "SELECT region, ROUND(SUM(amount), 2) AS total_sales FROM demo_sales WHERE region IN ('华东', '华南') GROUP BY region ORDER BY total_sales DESC",
+      "reference_sql": "SELECT region, ROUND(SUM(amount), 2) AS total_sales FROM demo_sales WHERE region IN ('华东', '华南') GROUP BY region ORDER BY total_sales DESC",
+      "reference_rows": [
+        [
+          "华东",
+          434296.44
+        ],
+        [
+          "华南",
+          338943.34
+        ]
+      ],
+      "actual_rows": [
+        [
+          "华东",
+          434296.44
+        ],
+        [
+          "华南",
+          338943.34
+        ]
+      ],
+      "status": "success",
+      "row_count": 2,
+      "retry_count": 0,
+      "correct": true,
+      "elapsed_ms": 4368.3,
+      "detail": "",
+      "error": null,
+      "error_type": null,
+      "engines": [
+        "openai-compatible"
+      ]
+    },
+    {
+      "id": 30,
+      "category": "边界与异常",
+      "question": "分析一下各地区的利润率",
+      "sql": "SELECT 1 AS unsupported",
+      "reference_sql": null,
+      "reference_rows": [],
+      "actual_rows": [],
+      "status": "failed",
+      "row_count": 0,
+      "retry_count": 0,
+      "correct": true,
+      "elapsed_ms": 7106.2,
+      "detail": "正确拒绝",
+      "error": "demo_sales 表中只有成交金额 amount，缺少成本或利润字段，无法计算各地区利润率；需补充成本/利润字段或成本维表后才能核算，若需替代口径可改用销售额占比或客单价（amount/quantity）。",
+      "error_type": "unsupported_question",
+      "engines": [
+        "openai-compatible"
+      ]
+    }
+  ],
+  "security": [
+    {
+      "name": "删除数据",
+      "sql": "DELETE FROM sales",
+      "blocked": true,
+      "reason": "检测到非查询语句（Delete），仅允许只读 SELECT 查询"
+    },
+    {
+      "name": "删表",
+      "sql": "DROP TABLE sales",
+      "blocked": true,
+      "reason": "检测到非查询语句（Drop），仅允许只读 SELECT 查询"
+    },
+    {
+      "name": "篡改数据",
+      "sql": "UPDATE sales SET amount = 0",
+      "blocked": true,
+      "reason": "检测到非查询语句（Update），仅允许只读 SELECT 查询"
+    },
+    {
+      "name": "读系统文件",
+      "sql": "SELECT * FROM read_csv_auto('/etc/passwd')",
+      "blocked": true,
+      "reason": "禁止使用表函数，只能查询已上传的数据表"
+    },
+    {
+      "name": "多语句注入",
+      "sql": "SELECT * FROM sales; DROP TABLE sales",
+      "blocked": true,
+      "reason": "检测到 2 条语句，只允许执行单条查询"
+    },
+    {
+      "name": "访问未知表",
+      "sql": "SELECT password FROM user_credentials",
+      "blocked": true,
+      "reason": "表 user_credentials 不在可访问白名单内，允许的表：demo_sales"
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "benchmark": "10 fixed synthetic Chinese SQL smoke cases",
+  "created_utc": "2026-11-01T14:24:56.764795+00:00",
+  "model": "deepseek-flash",
+  "csv_sha256": "cf24217e3375151022eb984ae5ff472679b8f28d97e71e74a29588a37c3bd2b9",
+  "script_sha256": "ec78a60bf88552d034367c72faaf55e18dc26b35fe2abf7e55983dcd0fc85f7e",
+  "limitations": "Small hand-written local development smoke test, not a held-out human-annotated benchmark. One run, single tiny dataset. Strict main output row and column-count matching; order when specified. No natural-language or safety score.",
+  "items": [
+    {
+      "id": "customers",
+      "question": "去重后有多少个不同客户？只返回一个数。",
+      "reference_sql": "SELECT COUNT(DISTINCT customer_id) AS total FROM orders",
+      "reference_rows": [
+        [
+          4
+        ]
+      ],
+      "ordered": false,
+      "passed": true,
+      "actual_rows": [
+        [
+          4
+        ]
+      ],
+      "elapsed_seconds": 3.875,
+      "task": {
+        "status": "success",
+        "error": null,
+        "error_type": null,
+        "sql": "SELECT COUNT(DISTINCT customer_id) AS distinct_customers FROM orders LIMIT 500",
+        "columns": [
+          "distinct_customers"
+        ],
+        "analysis": "4\n\n统计口径：`orders` 表中对 `customer_id` 做去重计数（COUNT DISTINCT），未排除空值（若存在 NULL 则不计入）。数据仅 6 行订单，样本很小。",
+        "queries": [
+          {
+            "result_id": "q1",
+            "sql": "SELECT COUNT(DISTINCT customer_id) AS distinct_customers FROM orders LIMIT 500",
+            "columns": [
+              "distinct_customers"
+            ],
+            "data": [
+              {
+                "distinct_customers": 4
+              }
+            ],
+            "row_count": 1,
+            "truncated": false,
+            "elapsed_ms": 8.27
+          }
+        ],
+        "tool_calls": [
+          {
+            "name": "inspect_schema",
+            "arguments": {},
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 0.04
+          },
+          {
+            "name": "run_safe_sql",
+            "arguments": {
+              "sql": "SELECT COUNT(DISTINCT customer_id) AS distinct_customers FROM orders"
+            },
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 20.85
+          },
+          {
+            "name": "select_result",
+            "arguments": {
+              "result_id": "q1"
+            },
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 0.07
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 5580,
+          "completion_tokens": 191,
+          "total_tokens": 5771
+        },
+        "selected_result_id": "q1",
+        "truncated": false
+      }
+    }
+  ],
+  "finished_utc": "2026-11-01T14:25:00.782541+00:00",
+  "passed": 1
+}
