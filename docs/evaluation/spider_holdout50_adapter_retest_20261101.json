@@ -1,0 +1,2526 @@
+{
+  "benchmark": "Spider 1.0 dev adapted CSV/DuckDB pilot",
+  "archive_sha256": "00636695dabed6b5f4b8328a16b13e069a2f16591d5efcce57660669c85b121b",
+  "sample_seed": 20261101,
+  "sample_size": 25,
+  "sample_population": 1034,
+  "commit": "fdca9d8094ab29dc72b7cb49ce1506335b39ff95",
+  "tracked_diff_sha256": "e7541721ead78fc14a59e402e78bf8d168a076f38421042b17bdf0f85af26f81",
+  "model": "deepseek-flash",
+  "temperature": 0.0,
+  "started_utc": "2026-11-01T07:27:07.035264+00:00",
+  "method": "Uniform random sample of dev indices; SQLite tables exported to CSV then normal project upload. Reference SQLite SQL is transpiled to DuckDB and must return equivalent rows before model call. Main score requires Agent success and returned main result rows matching reference (selected result if specified, else last query); order checked when reference has ORDER BY. Excluded cases and reasons retained. Not official Spider EX.",
+  "items": [
+    {
+      "index": 93,
+      "db_id": "car_1",
+      "question": "How many models does each car maker produce? List maker full name, id and the number.",
+      "reference_sql": "SELECT T1.FullName ,  T1.Id ,  count(*) FROM CAR_MAKERS AS T1 JOIN MODEL_LIST AS T2 ON T1.Id  =  T2.Maker GROUP BY T1.Id;",
+      "eligible": false,
+      "exclusion": "BinderException: Binder Error: column \"FullName\" must appear in the GROUP BY clause or must be part of an aggregate function.\nEither add it to the GROUP BY list, or use ANY_VALUE(\"FullName\") if the exact value of \"FullName\" is not important.\n\nLINE 1: SELECT T1.FullName, T1.Id, COUNT(*) FROM CAR_MAKERS AS T1 JOIN...\n"
+    },
+    {
+      "index": 131,
+      "db_id": "car_1",
+      "question": "What is the maximum horsepower and the make of the car models with 3 cylinders?",
+      "reference_sql": "SELECT T2.horsepower ,  T1.Make FROM CAR_NAMES AS T1 JOIN CARS_DATA AS T2 ON T1.MakeId  =  T2.Id WHERE T2.cylinders  =  3 ORDER BY T2.horsepower DESC LIMIT 1;",
+      "eligible": false,
+      "exclusion": "ValueError: sqlite_duckdb_reference_mismatch"
+    },
+    {
+      "index": 170,
+      "db_id": "car_1",
+      "question": "What is the maximum mpg of the cars that had 8 cylinders or that were produced before 1980 ?",
+      "reference_sql": "select max(mpg) from cars_data where cylinders  =  8 or year  <  1980",
+      "eligible": false,
+      "exclusion": "ValueError: sqlite_duckdb_reference_mismatch"
+    },
+    {
+      "index": 198,
+      "db_id": "flight_2",
+      "question": "Give the city and country for the Alton airport.",
+      "reference_sql": "SELECT City ,  Country FROM AIRPORTS WHERE AirportName  =  \"Alton\"",
+      "eligible": false,
+      "exclusion": "ValueError: sqlite_duckdb_reference_mismatch"
+    },
+    {
+      "index": 205,
+      "db_id": "flight_2",
+      "question": "How many flights have destination ATO?",
+      "reference_sql": "SELECT count(*) FROM FLIGHTS WHERE DestAirport  =  \"ATO\"",
+      "eligible": false,
+      "exclusion": "ValueError: sqlite_duckdb_reference_mismatch"
+    },
+    {
+      "index": 213,
+      "db_id": "flight_2",
+      "question": "How many flights does airline 'JetBlue Airways' have?",
+      "reference_sql": "SELECT count(*) FROM FLIGHTS AS T1 JOIN AIRLINES AS T2 ON T1.Airline  =  T2.uid WHERE T2.Airline = \"JetBlue Airways\"",
+      "eligible": true,
+      "reference_rows": [
+        [
+          100
+        ]
+      ],
+      "reference_duckdb_sql": "SELECT COUNT(*) FROM FLIGHTS AS T1 JOIN AIRLINES AS T2 ON T1.Airline = T2.uid WHERE T2.Airline = 'JetBlue Airways'",
+      "passed": false,
+      "ordered": false,
+      "actual_rows": [
+        [
+          100,
+          100,
+          100
+        ]
+      ],
+      "elapsed_seconds": 6.687,
+      "task": {
+        "status": "success",
+        "error_type": null,
+        "error": null,
+        "sql": "SELECT COUNT(*) AS flight_records, COUNT(DISTINCT FlightNo) AS distinct_flight_no, COUNT(DISTINCT SourceAirport || '-' || DestAirport) AS distinct_routes FROM flights WHERE Airline = 8 LIMIT 500",
+        "selected_result_id": "q2",
+        "queries": [
+          {
+            "result_id": "q1",
+            "sql": "SELECT * FROM airlines WHERE Airline ILIKE '%JetBlue%' LIMIT 500",
+            "columns": [
+              "uid",
+              "Airline",
+              "Abbreviation",
+              "Country"
+            ],
+            "data": [
+              {
+                "uid": 8,
+                "Airline": "JetBlue Airways",
+                "Abbreviation": "JetBlue",
+                "Country": "USA"
+              }
+            ],
+            "row_count": 1,
+            "truncated": false,
+            "elapsed_ms": 13.64
+          },
+          {
+            "result_id": "q2",
+            "sql": "SELECT COUNT(*) AS flight_records, COUNT(DISTINCT FlightNo) AS distinct_flight_no, COUNT(DISTINCT SourceAirport || '-' || DestAirport) AS distinct_routes FROM flights WHERE Airline = 8 LIMIT 500",
+            "columns": [
+              "flight_records",
+              "distinct_flight_no",
+              "distinct_routes"
+            ],
+            "data": [
+              {
+                "flight_records": 100,
+                "distinct_flight_no": 100,
+                "distinct_routes": 100
+              }
+            ],
+            "row_count": 1,
+            "truncated": false,
+            "elapsed_ms": 18.81
+          }
+        ],
+        "tool_calls": [
+          {
+            "name": "inspect_schema",
+            "arguments": {},
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 0.15
+          },
+          {
+            "name": "run_safe_sql",
+            "arguments": {
+              "sql": "SELECT * FROM airlines WHERE Airline ILIKE '%JetBlue%'"
+            },
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 15.25
+          },
+          {
+            "name": "profile_columns",
+            "arguments": {
+              "table": "flights",
+              "columns": [
+                "FlightNo",
+                "Airline"
+              ]
+            },
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 0.06
+          },
+          {
+            "name": "run_safe_sql",
+            "arguments": {
+              "sql": "SELECT COUNT(*) AS flight_records, COUNT(DISTINCT FlightNo) AS distinct_flight_no, COUNT(DISTINCT SourceAirport || '-' || DestAirport) AS distinct_routes FROM flights WHERE Airline = 8"
+            },
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 21.61
+          },
+          {
+            "name": "select_result",
+            "arguments": {
+              "result_id": "q2"
+            },
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 0.05
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 8897,
+          "completion_tokens": 622,
+          "total_tokens": 9519
+        },
+        "analysis": "**JetBlue Airways 共有 100 个航班。**\n\n统计口径与说明：\n- 航空公司在 `airlines` 表中为 `uid = 8`（JetBlue Airways，缩写 JetBlue，美国）；`flights.Airline` 存的是该 uid。\n- `flights` 表中 JetBlue 的记录数为 **100 条**。\n- 口径无歧义：这 100 条记录对应的不同航班号也是 100 个、不同「始发–目的」航线也是 100 条，因此按记录数、去重航班号或去重航线统计结果都一致。\n\n数据限制：该数据集为样本表（`flights` 共 1200 行、覆盖 12 家航空公司），代表的是数据集内收录的航班，而非 JetBlue 的真实全量航班规模。",
+        "trace": [
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型选择了 1 个工具",
+            "elapsed_ms": 704.76,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "inspect_schema",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 0.15,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型选择了 2 个工具",
+            "elapsed_ms": 1218.19,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "run_safe_sql",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 15.25,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "profile_columns",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 0.06,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型选择了 1 个工具",
+            "elapsed_ms": 1574.84,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "run_safe_sql",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 21.61,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型选择了 1 个工具",
+            "elapsed_ms": 1184.5,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "select_result",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 0.05,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型输出最终答复",
+            "elapsed_ms": 1948.22,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          }
+        ],
+        "truncated": false,
+        "retry_count": 0
+      }
+    },
+    {
+      "index": 216,
+      "db_id": "flight_2",
+      "question": "Count the number of United Airlines flights arriving in ASY Airport.",
+      "reference_sql": "SELECT count(*) FROM AIRLINES AS T1 JOIN FLIGHTS AS T2 ON T2.Airline  =  T1.uid WHERE T1.Airline  =  \"United Airlines\" AND T2.DestAirport  =  \"ASY\"",
+      "eligible": false,
+      "exclusion": "ValueError: sqlite_duckdb_reference_mismatch"
+    },
+    {
+      "index": 430,
+      "db_id": "wta_1",
+      "question": "How many players are there?",
+      "reference_sql": "SELECT count(*) FROM players",
+      "eligible": false,
+      "exclusion": "OperationalError: Could not decode to UTF-8 column 'last_name' with text 'Treyes Albarrac��N'"
+    },
+    {
+      "index": 433,
+      "db_id": "wta_1",
+      "question": "List the first name and birth date of all players from the country with code USA.",
+      "reference_sql": "SELECT first_name ,  birth_date FROM players WHERE country_code  =  'USA'",
+      "eligible": false,
+      "exclusion": "OperationalError: Could not decode to UTF-8 column 'last_name' with text 'Treyes Albarrac��N'"
+    },
+    {
+      "index": 440,
+      "db_id": "wta_1",
+      "question": "What is the best rank of losers across all matches?",
+      "reference_sql": "SELECT min(loser_rank) FROM matches",
+      "eligible": false,
+      "exclusion": "OperationalError: Could not decode to UTF-8 column 'last_name' with text 'Treyes Albarrac��N'"
+    },
+    {
+      "index": 470,
+      "db_id": "wta_1",
+      "question": "What are the first names of all players, and their average rankings?",
+      "reference_sql": "SELECT avg(ranking) ,  T1.first_name FROM players AS T1 JOIN rankings AS T2 ON T1.player_id  =  T2.player_id GROUP BY T1.first_name",
+      "eligible": false,
+      "exclusion": "OperationalError: Could not decode to UTF-8 column 'last_name' with text 'Treyes Albarrac��N'"
+    },
+    {
+      "index": 599,
+      "db_id": "tvshow",
+      "question": "What is the content of TV Channel with serial name \"Sky Radio\"?",
+      "reference_sql": "SELECT Content FROM TV_Channel WHERE series_name = \"Sky Radio\";",
+      "eligible": true,
+      "reference_rows": [
+        [
+          "music"
+        ]
+      ],
+      "reference_duckdb_sql": "SELECT Content FROM TV_Channel WHERE series_name = 'Sky Radio'",
+      "passed": false,
+      "ordered": false,
+      "actual_rows": [
+        [
+          "Sky Radio",
+          "music"
+        ]
+      ],
+      "elapsed_seconds": 3.939,
+      "task": {
+        "status": "success",
+        "error_type": null,
+        "error": null,
+        "sql": "SELECT series_name, Content FROM tv_channel WHERE LOWER(series_name) LIKE '%sky radio%' LIMIT 500",
+        "selected_result_id": "q1",
+        "queries": [
+          {
+            "result_id": "q1",
+            "sql": "SELECT series_name, Content FROM tv_channel WHERE LOWER(series_name) LIKE '%sky radio%' LIMIT 500",
+            "columns": [
+              "series_name",
+              "Content"
+            ],
+            "data": [
+              {
+                "series_name": "Sky Radio",
+                "Content": "music"
+              }
+            ],
+            "row_count": 1,
+            "truncated": false,
+            "elapsed_ms": 17.99
+          }
+        ],
+        "tool_calls": [
+          {
+            "name": "inspect_schema",
+            "arguments": {},
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 0.14
+          },
+          {
+            "name": "run_safe_sql",
+            "arguments": {
+              "sql": "SELECT series_name, Content FROM tv_channel WHERE lower(series_name) LIKE '%sky radio%'"
+            },
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 22.36
+          },
+          {
+            "name": "select_result",
+            "arguments": {
+              "result_id": "q1"
+            },
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 0.06
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 6310,
+          "completion_tokens": 235,
+          "total_tokens": 6545
+        },
+        "analysis": "在 `tv_channel` 表中，查询 `series_name = \"Sky Radio\"` 的记录显示：\n\n| series_name | Content |\n|---|---|\n| Sky Radio | music |\n\n**统计口径**：按 `tv_channel.series_name` 精确匹配（大小写不敏感，构建 `LIKE '%sky radio%'`）后取 `Content` 字段，恰好命中 1 行。该字段为频道的文本内容类型描述，值为 `music`（音乐）。",
+        "trace": [
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型选择了 1 个工具",
+            "elapsed_ms": 850.36,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "inspect_schema",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 0.14,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型选择了 1 个工具",
+            "elapsed_ms": 809.53,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "run_safe_sql",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 22.36,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型选择了 1 个工具",
+            "elapsed_ms": 974.86,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "select_result",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 0.06,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型输出最终答复",
+            "elapsed_ms": 1268.75,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          }
+        ],
+        "truncated": false,
+        "retry_count": 0
+      }
+    },
+    {
+      "index": 625,
+      "db_id": "tvshow",
+      "question": "List the Episode of all  TV series showed on TV Channel with series name \"Sky Radio\".",
+      "reference_sql": "SELECT T2.Episode FROM TV_Channel AS T1 JOIN TV_series AS T2 ON T1.id = T2.Channel WHERE T1.series_name = \"Sky Radio\";",
+      "eligible": true,
+      "reference_rows": [
+        [
+          "A Love of a Lifetime"
+        ],
+        [
+          "Keepers"
+        ]
+      ],
+      "reference_duckdb_sql": "SELECT T2.Episode FROM TV_Channel AS T1 JOIN TV_series AS T2 ON T1.id = T2.Channel WHERE T1.series_name = 'Sky Radio'",
+      "passed": false,
+      "ordered": false,
+      "actual_rows": [
+        [
+          "Sky Radio",
+          "A Love of a Lifetime",
+          "2007-09-24T00:00:00",
+          5.8,
+          9.0,
+          9.16
+        ],
+        [
+          "Sky Radio",
+          "Keepers",
+          "2007-10-29T00:00:00",
+          3.7,
+          6.0,
+          5.75
+        ]
+      ],
+      "elapsed_seconds": 5.602,
+      "task": {
+        "status": "success",
+        "error_type": null,
+        "error": null,
+        "sql": "SELECT c.series_name, s.Episode, s.Air_Date, s.Rating, s.Share, s.Viewers_m FROM tv_series AS s JOIN tv_channel AS c ON s.Channel = c.id WHERE c.series_name = 'Sky Radio' ORDER BY s.Air_Date LIMIT 500",
+        "selected_result_id": "q3",
+        "queries": [
+          {
+            "result_id": "q1",
+            "sql": "SELECT id, series_name, Country, Language FROM tv_channel ORDER BY id LIMIT 500",
+            "columns": [
+              "id",
+              "series_name",
+              "Country",
+              "Language"
+            ],
+            "data": [
+              {
+                "id": 700,
+                "series_name": "Sky Radio",
+                "Country": "Italy",
+                "Language": "Italian"
+              },
+              {
+                "id": 701,
+                "series_name": "Sky Music",
+                "Country": "Italy",
+                "Language": "Italian"
+              },
+              {
+                "id": 703,
+                "series_name": "Music Box Italia",
+                "Country": "Italy",
+                "Language": "Italian"
+              },
+              {
+                "id": 704,
+                "series_name": "MTV Hits",
+                "Country": "Italy",
+                "Language": "Italian"
+              },
+              {
+                "id": 705,
+                "series_name": "MTV Classic",
+                "Country": "Italy",
+                "Language": "Italian"
+              },
+              {
+                "id": 706,
+                "series_name": "MTV Rocks",
+                "Country": "United Kingdom",
+                "Language": "English"
+              },
+              {
+                "id": 707,
+                "series_name": "MTV Dance",
+                "Country": "United Kingdom",
+                "Language": "English"
+              },
+              {
+                "id": 708,
+                "series_name": "MTV Music",
+                "Country": "Italy",
+                "Language": "Italian"
+              },
+              {
+                "id": 709,
+                "series_name": "MTV Live HD",
+                "Country": "Poland",
+                "Language": "English"
+              },
+              {
+                "id": 713,
+                "series_name": "Radio Capital TiVù",
+                "Country": "Italy",
+                "Language": "Italian"
+              },
+              {
+                "id": 714,
+                "series_name": "myDeejay",
+                "Country": "Italy",
+                "Language": "Italian"
+              },
+              {
+                "id": 715,
+                "series_name": "Match Music",
+                "Country": "Italy",
+                "Language": "Italian"
+              },
+              {
+                "id": 717,
+                "series_name": "Rock TV",
+                "Country": "Italy",
+                "Language": "Italian"
+              },
+              {
+                "id": 719,
+                "series_name": "Hip Hop TV",
+                "Country": "Italy",
+                "Language": "Italian"
+              },
+              {
+                "id": 728,
+                "series_name": "Classica",
+                "Country": "Italy",
+                "Language": "Italian"
+              }
+            ],
+            "row_count": 15,
+            "truncated": false,
+            "elapsed_ms": 18.72
+          },
+          {
+            "result_id": "q2",
+            "sql": "SELECT * FROM tv_series ORDER BY Channel, Episode LIMIT 500",
+            "columns": [
+              "id",
+              "Episode",
+              "Air_Date",
+              "Rating",
+              "Share",
+              "18_49_Rating_Share",
+              "Viewers_m",
+              "Weekly_Rank",
+              "Channel"
+            ],
+            "data": [
+              {
+                "id": 1.0,
+                "Episode": "A Love of a Lifetime",
+                "Air_Date": "2007-09-24T00:00:00",
+                "Rating": 5.8,
+                "Share": 9.0,
+                "18_49_Rating_Share": "3.5/9",
+                "Viewers_m": 9.16,
+                "Weekly_Rank": 43.0,
+                "Channel": 700
+              },
+              {
+                "id": 6.0,
+                "Episode": "Keepers",
+                "Air_Date": "2007-10-29T00:00:00",
+                "Rating": 3.7,
+                "Share": 6.0,
+                "18_49_Rating_Share": "2.2/6",
+                "Viewers_m": 5.75,
+                "Weekly_Rank": 71.0,
+                "Channel": 700
+              },
+              {
+                "id": 2.0,
+                "Episode": "Friendly Skies",
+                "Air_Date": "2007-10-01T00:00:00",
+                "Rating": 5.3,
+                "Share": 9.0,
+                "18_49_Rating_Share": "3.2/8",
+                "Viewers_m": 8.23,
+                "Weekly_Rank": 50.0,
+                "Channel": 701
+              },
+              {
+                "id": 3.0,
+                "Episode": "Game Three",
+                "Air_Date": "2007-10-08T00:00:00",
+                "Rating": 4.4,
+                "Share": 7.0,
+                "18_49_Rating_Share": "2.9/7",
+                "Viewers_m": 6.94,
+                "Weekly_Rank": 61.0,
+                "Channel": 707
+              },
+              {
+                "id": 8.0,
+                "Episode": "Winterland",
+                "Air_Date": "2007-11-12T00:00:00",
+                "Rating": 4.0,
+                "Share": 7.0,
+                "18_49_Rating_Share": "2.4/6",
+                "Viewers_m": 6.09,
+                "Weekly_Rank": 70.0,
+                "Channel": 707
+              },
+              {
+                "id": 7.0,
+                "Episode": "Double Down",
+                "Air_Date": "2007-11-05T00:00:00",
+                "Rating": 3.4,
+                "Share": 6.0,
+                "18_49_Rating_Share": "2.1/5",
+                "Viewers_m": 5.13,
+                "Weekly_Rank": 80.0,
+                "Channel": 708
+              },
+              {
+                "id": 4.0,
+                "Episode": "The Year of the Rabbit",
+                "Air_Date": "2007-10-15T00:00:00",
+                "Rating": 4.3,
+                "Share": 7.0,
+                "18_49_Rating_Share": "2.7/7",
+                "Viewers_m": 6.75,
+                "Weekly_Rank": 67.0,
+                "Channel": 713
+              },
+              {
+                "id": 12.0,
+                "Episode": "The Hanged Man",
+                "Air_Date": "2007-12-17T00:00:00",
+                "Rating": 3.0,
+                "Share": 5.0,
+                "18_49_Rating_Share": "1.5/4",
+                "Viewers_m": 4.24,
+                "Weekly_Rank": 65.0,
+                "Channel": 714
+              },
+              {
+                "id": 5.0,
+                "Episode": "The Legend of Dylan McCleen",
+                "Air_Date": "2007-10-22T00:00:00",
+                "Rating": 3.8,
+                "Share": 6.0,
+                "18_49_Rating_Share": "2.4/6",
+                "Viewers_m": 6.06,
+                "Weekly_Rank": 72.0,
+                "Channel": 714
+              },
+              {
+                "id": 9.0,
+                "Episode": "Emily",
+                "Air_Date": "2007-11-19T00:00:00",
+                "Rating": 3.7,
+                "Share": 6.0,
+                "18_49_Rating_Share": "2.2/6",
+                "Viewers_m": 5.61,
+                "Weekly_Rank": 66.0,
+                "Channel": 717
+              },
+              {
+                "id": 10.0,
+                "Episode": "Blowback",
+                "Air_Date": "2007-11-26T00:00:00",
+                "Rating": 3.7,
+                "Share": 6.0,
+                "18_49_Rating_Share": "2.4/6",
+                "Viewers_m": 6.05,
+                "Weekly_Rank": 68.0,
+                "Channel": 719
+              },
+              {
+                "id": 11.0,
+                "Episode": "Home By Another Way",
+                "Air_Date": "2007-12-10T00:00:00",
+                "Rating": 3.5,
+                "Share": 6.0,
+                "18_49_Rating_Share": "1.7/5",
+                "Viewers_m": 5.28,
+                "Weekly_Rank": 62.0,
+                "Channel": 728
+              }
+            ],
+            "row_count": 12,
+            "truncated": false,
+            "elapsed_ms": 9.94
+          },
+          {
+            "result_id": "q3",
+            "sql": "SELECT c.series_name, s.Episode, s.Air_Date, s.Rating, s.Share, s.Viewers_m FROM tv_series AS s JOIN tv_channel AS c ON s.Channel = c.id WHERE c.series_name = 'Sky Radio' ORDER BY s.Air_Date LIMIT 500",
+            "columns": [
+              "series_name",
+              "Episode",
+              "Air_Date",
+              "Rating",
+              "Share",
+              "Viewers_m"
+            ],
+            "data": [
+              {
+                "series_name": "Sky Radio",
+                "Episode": "A Love of a Lifetime",
+                "Air_Date": "2007-09-24T00:00:00",
+                "Rating": 5.8,
+                "Share": 9.0,
+                "Viewers_m": 9.16
+              },
+              {
+                "series_name": "Sky Radio",
+                "Episode": "Keepers",
+                "Air_Date": "2007-10-29T00:00:00",
+                "Rating": 3.7,
+                "Share": 6.0,
+                "Viewers_m": 5.75
+              }
+            ],
+            "row_count": 2,
+            "truncated": false,
+            "elapsed_ms": 16.11
+          }
+        ],
+        "tool_calls": [
+          {
+            "name": "inspect_schema",
+            "arguments": {},
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 0.13
+          },
+          {
+            "name": "run_safe_sql",
+            "arguments": {
+              "sql": "SELECT id, series_name, Country, Language FROM tv_channel ORDER BY id"
+            },
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 20.48
+          },
+          {
+            "name": "run_safe_sql",
+            "arguments": {
+              "sql": "SELECT * FROM tv_series ORDER BY Channel, Episode"
+            },
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 11.04
+          },
+          {
+            "name": "run_safe_sql",
+            "arguments": {
+              "sql": "SELECT c.series_name, s.Episode, s.Air_Date, s.Rating, s.Share, s.Viewers_m\nFROM tv_series s\nJOIN tv_channel c ON s.Channel = c.id\nWHERE c.series_name = 'Sky Radio'\nORDER BY s.Air_Date"
+            },
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 23.97
+          },
+          {
+            "name": "select_result",
+            "arguments": {
+              "result_id": "q3"
+            },
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 0.07
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 13834,
+          "completion_tokens": 533,
+          "total_tokens": 14367
+        },
+        "analysis": "“Sky Radio”（频道表中系列名为 Sky Radio，频道 id=700，意大利/意大利语）共播出 2 集：\n\n| Episode | 播出日期 | Rating | Share | 收视人数（百万） |\n|---|---|---|---|---|\n| A Love of a Lifetime | 2007-09-24 | 5.8 | 9.0 | 9.16 |\n| Keepers | 2007-10-29 | 3.7 | 6.0 | 5.75 |\n\n口径说明：通过 tv_series.Channel = tv_channel.id 关联，筛选 tv_channel.series_name 精确等于 'Sky Radio'，按播出日期排序；每行即一集，未做额外去重。数据中该频道仅记录了这 2 条剧集记录，可能存在数据不全的情况。",
+        "trace": [
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型选择了 1 个工具",
+            "elapsed_ms": 482.17,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "inspect_schema",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 0.13,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型选择了 2 个工具",
+            "elapsed_ms": 1579.87,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "run_safe_sql",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 20.48,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "run_safe_sql",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 11.04,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型选择了 1 个工具",
+            "elapsed_ms": 1162.22,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "run_safe_sql",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 23.97,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型选择了 1 个工具",
+            "elapsed_ms": 670.44,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "select_result",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 0.07,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型输出最终答复",
+            "elapsed_ms": 1626.83,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          }
+        ],
+        "truncated": false,
+        "retry_count": 0
+      }
+    },
+    {
+      "index": 632,
+      "db_id": "tvshow",
+      "question": "What are the package options and the name of the series for the TV Channel that supports high definition TV?",
+      "reference_sql": "SELECT package_option ,  series_name FROM TV_Channel WHERE hight_definition_TV  =  \"yes\"",
+      "eligible": true,
+      "reference_rows": [
+        [
+          "Sky Famiglia + Sky HD",
+          "MTV Live HD"
+        ]
+      ],
+      "reference_duckdb_sql": "SELECT package_option, series_name FROM TV_Channel WHERE hight_definition_TV = 'yes'",
+      "passed": false,
+      "ordered": false,
+      "actual_rows": [
+        [
+          "MTV Live HD",
+          "Sky Famiglia + Sky HD"
+        ]
+      ],
+      "elapsed_seconds": 6.155,
+      "task": {
+        "status": "success",
+        "error_type": null,
+        "error": null,
+        "sql": "SELECT series_name, Package_Option FROM tv_channel WHERE LOWER(TRIM(Hight_definition_TV)) = 'yes' ORDER BY series_name LIMIT 500",
+        "selected_result_id": "q2",
+        "queries": [
+          {
+            "result_id": "q1",
+            "sql": "SELECT id, series_name, Hight_definition_TV, Package_Option FROM tv_channel ORDER BY id LIMIT 500",
+            "columns": [
+              "id",
+              "series_name",
+              "Hight_definition_TV",
+              "Package_Option"
+            ],
+            "data": [
+              {
+                "id": 700,
+                "series_name": "Sky Radio",
+                "Hight_definition_TV": "no",
+                "Package_Option": "Sky Famiglia"
+              },
+              {
+                "id": 701,
+                "series_name": "Sky Music",
+                "Hight_definition_TV": "no",
+                "Package_Option": "Sky Famiglia"
+              },
+              {
+                "id": 703,
+                "series_name": "Music Box Italia",
+                "Hight_definition_TV": "no",
+                "Package_Option": "Sky Famiglia"
+              },
+              {
+                "id": 704,
+                "series_name": "MTV Hits",
+                "Hight_definition_TV": "no",
+                "Package_Option": "Sky Famiglia"
+              },
+              {
+                "id": 705,
+                "series_name": "MTV Classic",
+                "Hight_definition_TV": "no",
+                "Package_Option": "Sky Famiglia"
+              },
+              {
+                "id": 706,
+                "series_name": "MTV Rocks",
+                "Hight_definition_TV": "no",
+                "Package_Option": "Sky Famiglia"
+              },
+              {
+                "id": 707,
+                "series_name": "MTV Dance",
+                "Hight_definition_TV": "no",
+                "Package_Option": "Sky Famiglia"
+              },
+              {
+                "id": 708,
+                "series_name": "MTV Music",
+                "Hight_definition_TV": "no",
+                "Package_Option": "no ( FTV )"
+              },
+              {
+                "id": 709,
+                "series_name": "MTV Live HD",
+                "Hight_definition_TV": "yes",
+                "Package_Option": "Sky Famiglia + Sky HD"
+              },
+              {
+                "id": 713,
+                "series_name": "Radio Capital TiVù",
+                "Hight_definition_TV": "no",
+                "Package_Option": "no ( FTV )"
+              },
+              {
+                "id": 714,
+                "series_name": "myDeejay",
+                "Hight_definition_TV": "no",
+                "Package_Option": "Sky Famiglia"
+              },
+              {
+                "id": 715,
+                "series_name": "Match Music",
+                "Hight_definition_TV": "no",
+                "Package_Option": "Sky Famiglia"
+              },
+              {
+                "id": 717,
+                "series_name": "Rock TV",
+                "Hight_definition_TV": "no",
+                "Package_Option": "Sky Famiglia"
+              },
+              {
+                "id": 719,
+                "series_name": "Hip Hop TV",
+                "Hight_definition_TV": "no",
+                "Package_Option": "Sky Famiglia"
+              },
+              {
+                "id": 728,
+                "series_name": "Classica",
+                "Hight_definition_TV": "no",
+                "Package_Option": "Option"
+              }
+            ],
+            "row_count": 15,
+            "truncated": false,
+            "elapsed_ms": 20.03
+          },
+          {
+            "result_id": "q2",
+            "sql": "SELECT series_name, Package_Option FROM tv_channel WHERE LOWER(TRIM(Hight_definition_TV)) = 'yes' ORDER BY series_name LIMIT 500",
+            "columns": [
+              "series_name",
+              "Package_Option"
+            ],
+            "data": [
+              {
+                "series_name": "MTV Live HD",
+                "Package_Option": "Sky Famiglia + Sky HD"
+              }
+            ],
+            "row_count": 1,
+            "truncated": false,
+            "elapsed_ms": 18.33
+          }
+        ],
+        "tool_calls": [
+          {
+            "name": "inspect_schema",
+            "arguments": {},
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 0.16
+          },
+          {
+            "name": "run_safe_sql",
+            "arguments": {
+              "sql": "SELECT id, series_name, Hight_definition_TV, Package_Option FROM tv_channel ORDER BY id"
+            },
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 22.04
+          },
+          {
+            "name": "profile_columns",
+            "arguments": {
+              "table": "tv_channel",
+              "columns": [
+                "Hight_definition_TV",
+                "Package_Option",
+                "series_name"
+              ]
+            },
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 0.08
+          },
+          {
+            "name": "run_safe_sql",
+            "arguments": {
+              "sql": "SELECT series_name, Package_Option FROM tv_channel WHERE lower(trim(Hight_definition_TV)) = 'yes' ORDER BY series_name"
+            },
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 25.15
+          },
+          {
+            "name": "select_result",
+            "arguments": {
+              "result_id": "q2"
+            },
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 0.11
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 11072,
+          "completion_tokens": 613,
+          "total_tokens": 11685
+        },
+        "analysis": "**结果**\n\n在 `tv_channel` 表（15 行，无重复行、无空值）中，`Hight_definition_TV = 'yes'` 的频道只有 1 个：\n\n| series_name（系列/频道名） | Package_Option（套餐选项） |\n|---|---|\n| MTV Live HD | Sky Famiglia + Sky HD |\n\n**统计口径说明**\n- 口径：`tv_channel` 表中 `Hight_definition_TV` 字段去空格、转小写后等于 `'yes'` 的记录。\n- 该字段仅有 `yes` / `no` 两种取值，故\"支持高清\"的判定不存在歧义。\n- 数据中全表 15 个频道仅此 1 个标为支持高清，因此答案为单条记录，而非多个套餐的并集；若按频道逐一列出，其余 14 个频道均为 `no`（套餐集中于 Sky Famiglia、no ( FTV )、Option 等）。\n- `Content` 字段未参与判定，无法据此判断高清内容类型的差异；\"系列\"这里按 `series_name` 理解，若你指的是 `tv_series` 表中的节目分集，则该问题需另行按 `Channel` 关联查询。",
+        "trace": [
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型选择了 1 个工具",
+            "elapsed_ms": 622.79,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "inspect_schema",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 0.16,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型选择了 2 个工具",
+            "elapsed_ms": 1056.75,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "run_safe_sql",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 22.04,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "profile_columns",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 0.08,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型选择了 1 个工具",
+            "elapsed_ms": 1381.24,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "run_safe_sql",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 25.15,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型选择了 1 个工具",
+            "elapsed_ms": 842.63,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "select_result",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 0.11,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型输出最终答复",
+            "elapsed_ms": 2182.76,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          }
+        ],
+        "truncated": false,
+        "retry_count": 0
+      }
+    },
+    {
+      "index": 665,
+      "db_id": "poker_player",
+      "question": "What is the birth date of the poker player with the lowest earnings?",
+      "reference_sql": "SELECT T1.Birth_Date FROM people AS T1 JOIN poker_player AS T2 ON T1.People_ID  =  T2.People_ID ORDER BY T2.Earnings ASC LIMIT 1",
+      "eligible": false,
+      "exclusion": "ValueError: sqlite_duckdb_reference_mismatch"
+    },
+    {
+      "index": 679,
+      "db_id": "poker_player",
+      "question": "List the names and birth dates of people in ascending alphabetical order of name.",
+      "reference_sql": "SELECT Name ,  Birth_Date FROM people ORDER BY Name ASC",
+      "eligible": false,
+      "exclusion": "ValueError: sqlite_duckdb_reference_mismatch"
+    },
+    {
+      "index": 710,
+      "db_id": "world_1",
+      "question": "Which region is the city Kabul located in?",
+      "reference_sql": "SELECT Region FROM country AS T1 JOIN city AS T2 ON T1.Code  =  T2.CountryCode WHERE T2.Name  =  \"Kabul\"",
+      "eligible": true,
+      "reference_rows": [
+        [
+          "Southern and Central Asia"
+        ]
+      ],
+      "reference_duckdb_sql": "SELECT Region FROM country AS T1 JOIN city AS T2 ON T1.Code = T2.CountryCode WHERE T2.Name = 'Kabul'",
+      "passed": false,
+      "ordered": false,
+      "actual_rows": [
+        [
+          "Kabul",
+          "AFG",
+          "Afghanistan",
+          "Southern and Central Asia",
+          "Asia",
+          "Kabol",
+          1780000
+        ]
+      ],
+      "elapsed_seconds": 4.804,
+      "task": {
+        "status": "success",
+        "error_type": null,
+        "error": null,
+        "sql": "SELECT ci.Name AS City, ci.CountryCode, c.Name AS Country, c.Region, c.Continent, ci.District, ci.Population FROM city AS ci LEFT JOIN country AS c ON ci.CountryCode = c.Code WHERE LOWER(ci.Name) = 'kabul' LIMIT 500",
+        "selected_result_id": "q1",
+        "queries": [
+          {
+            "result_id": "q1",
+            "sql": "SELECT ci.Name AS City, ci.CountryCode, c.Name AS Country, c.Region, c.Continent, ci.District, ci.Population FROM city AS ci LEFT JOIN country AS c ON ci.CountryCode = c.Code WHERE LOWER(ci.Name) = 'kabul' LIMIT 500",
+            "columns": [
+              "City",
+              "CountryCode",
+              "Country",
+              "Region",
+              "Continent",
+              "District",
+              "Population"
+            ],
+            "data": [
+              {
+                "City": "Kabul",
+                "CountryCode": "AFG",
+                "Country": "Afghanistan",
+                "Region": "Southern and Central Asia",
+                "Continent": "Asia",
+                "District": "Kabol",
+                "Population": 1780000
+              }
+            ],
+            "row_count": 1,
+            "truncated": false,
+            "elapsed_ms": 22.45
+          }
+        ],
+        "tool_calls": [
+          {
+            "name": "inspect_schema",
+            "arguments": {},
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 0.13
+          },
+          {
+            "name": "run_safe_sql",
+            "arguments": {
+              "sql": "SELECT ci.Name AS City, ci.CountryCode, c.Name AS Country, c.Region, c.Continent, ci.District, ci.Population\nFROM city ci LEFT JOIN country c ON ci.CountryCode = c.Code\nWHERE lower(ci.Name) = 'kabul'"
+            },
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 27.84
+          },
+          {
+            "name": "select_result",
+            "arguments": {
+              "result_id": "q1"
+            },
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 0.05
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 6378,
+          "completion_tokens": 302,
+          "total_tokens": 6680
+        },
+        "analysis": "**Kabul 位于“Southern and Central Asia”（中南亚）区域。**\n\n- 城市：Kabul（阿富汗，国家代码 AFG）\n- 所属国家：Afghanistan\n- 区域（country.Region）：Southern and Central Asia\n- 大洲：Asia\n- 城市所在行政区（District）：Kabol\n- 城市人口：1,780,000\n\n统计口径：从 city 表中匹配城市名 Kabul，再按 CountryCode = country.Code 关联 country 表，以取得其 Region 字段；城市名匹配不区分大小写，共匹配到 1 条记录。",
+        "trace": [
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型选择了 1 个工具",
+            "elapsed_ms": 948.1,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "inspect_schema",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 0.13,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型选择了 1 个工具",
+            "elapsed_ms": 1318.55,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "run_safe_sql",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 27.84,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型选择了 1 个工具",
+            "elapsed_ms": 928.45,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "select_result",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 0.05,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型输出最终答复",
+            "elapsed_ms": 1570.16,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          }
+        ],
+        "truncated": false,
+        "retry_count": 0
+      }
+    },
+    {
+      "index": 725,
+      "db_id": "world_1",
+      "question": "Give the average life expectancy for countries in Africa which are republics?",
+      "reference_sql": "SELECT avg(LifeExpectancy) FROM country WHERE Continent  =  \"Africa\" AND GovernmentForm  =  \"Republic\"",
+      "eligible": true,
+      "reference_rows": [
+        [
+          50.84347826086957
+        ]
+      ],
+      "reference_duckdb_sql": "SELECT AVG(LifeExpectancy) FROM country WHERE Continent = 'Africa' AND GovernmentForm = 'Republic'",
+      "passed": false,
+      "ordered": false,
+      "actual_rows": [
+        [
+          "Republic only",
+          46,
+          46,
+          50.843
+        ],
+        [
+          "All forms containing \"Republic\"",
+          49,
+          49,
+          51.061
+        ]
+      ],
+      "elapsed_seconds": 6.742,
+      "task": {
+        "status": "success",
+        "error_type": null,
+        "error": null,
+        "sql": "SELECT * FROM (SELECT 'Republic only' AS scope, COUNT(*) AS n_countries, COUNT(LifeExpectancy) AS n_with_le, ROUND(AVG(LifeExpectancy), 3) AS avg_life_expectancy FROM country WHERE Continent = 'Africa' AND GovernmentForm = 'Republic' UNION ALL SELECT 'All forms containing \"Republic\"' AS scope, COUNT(*) AS n_countries, COUNT(LifeExpectancy) AS n_with_le, ROUND(AVG(LifeExpectancy), 3) AS avg_life_expectancy FROM country WHERE Continent = 'Africa' AND GovernmentForm ILIKE '%republic%') AS _capped LIMIT 500",
+        "selected_result_id": "q2",
+        "queries": [
+          {
+            "result_id": "q1",
+            "sql": "SELECT GovernmentForm, COUNT(*) AS n, COUNT(LifeExpectancy) AS n_le FROM country WHERE Continent = 'Africa' GROUP BY GovernmentForm ORDER BY n DESC LIMIT 500",
+            "columns": [
+              "GovernmentForm",
+              "n",
+              "n_le"
+            ],
+            "data": [
+              {
+                "GovernmentForm": "Republic",
+                "n": 46,
+                "n_le": 46
+              },
+              {
+                "GovernmentForm": "Dependent Territory of the UK",
+                "n": 2,
+                "n_le": 1
+              },
+              {
+                "GovernmentForm": "Federal Republic",
+                "n": 2,
+                "n_le": 2
+              },
+              {
+                "GovernmentForm": "Constitutional Monarchy",
+                "n": 2,
+                "n_le": 2
+              },
+              {
+                "GovernmentForm": "Territorial Collectivity of France",
+                "n": 1,
+                "n_le": 1
+              },
+              {
+                "GovernmentForm": "Monarchy",
+                "n": 1,
+                "n_le": 1
+              },
+              {
+                "GovernmentForm": "Socialistic State",
+                "n": 1,
+                "n_le": 1
+              },
+              {
+                "GovernmentForm": "Occupied by Marocco",
+                "n": 1,
+                "n_le": 1
+              },
+              {
+                "GovernmentForm": "Islamic Republic",
+                "n": 1,
+                "n_le": 1
+              },
+              {
+                "GovernmentForm": "Overseas Department of France",
+                "n": 1,
+                "n_le": 1
+              }
+            ],
+            "row_count": 10,
+            "truncated": false,
+            "elapsed_ms": 9.81
+          },
+          {
+            "result_id": "q2",
+            "sql": "SELECT * FROM (SELECT 'Republic only' AS scope, COUNT(*) AS n_countries, COUNT(LifeExpectancy) AS n_with_le, ROUND(AVG(LifeExpectancy), 3) AS avg_life_expectancy FROM country WHERE Continent = 'Africa' AND GovernmentForm = 'Republic' UNION ALL SELECT 'All forms containing \"Republic\"' AS scope, COUNT(*) AS n_countries, COUNT(LifeExpectancy) AS n_with_le, ROUND(AVG(LifeExpectancy), 3) AS avg_life_expectancy FROM country WHERE Continent = 'Africa' AND GovernmentForm ILIKE '%republic%') AS _capped LIMIT 500",
+            "columns": [
+              "scope",
+              "n_countries",
+              "n_with_le",
+              "avg_life_expectancy"
+            ],
+            "data": [
+              {
+                "scope": "Republic only",
+                "n_countries": 46,
+                "n_with_le": 46,
+                "avg_life_expectancy": 50.843
+              },
+              {
+                "scope": "All forms containing \"Republic\"",
+                "n_countries": 49,
+                "n_with_le": 49,
+                "avg_life_expectancy": 51.061
+              }
+            ],
+            "row_count": 2,
+            "truncated": false,
+            "elapsed_ms": 21.94
+          }
+        ],
+        "tool_calls": [
+          {
+            "name": "inspect_schema",
+            "arguments": {},
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 0.24
+          },
+          {
+            "name": "run_safe_sql",
+            "arguments": {
+              "sql": "SELECT GovernmentForm, COUNT(*) AS n, COUNT(LifeExpectancy) AS n_le FROM country WHERE Continent = 'Africa' GROUP BY GovernmentForm ORDER BY n DESC"
+            },
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 11.02
+          },
+          {
+            "name": "run_safe_sql",
+            "arguments": {
+              "sql": "SELECT\n  'Republic only' AS scope,\n  COUNT(*) AS n_countries,\n  COUNT(LifeExpectancy) AS n_with_le,\n  ROUND(AVG(LifeExpectancy), 3) AS avg_life_expectancy\nFROM country\nWHERE Continent = 'Africa' AND GovernmentForm = 'Republic'\nUNION ALL\nSELECT\n  'All forms containing \"Republic\"' AS scope,\n  COUNT(*) AS n_countries,\n  COUNT(LifeExpectancy) AS n_with_le,\n  ROUND(AVG(LifeExpectancy), 3) AS avg_life_expectancy\nFROM country\nWHERE Continent = 'Africa' AND GovernmentForm ILIKE '%republic%'"
+            },
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 26.78
+          },
+          {
+            "name": "select_result",
+            "arguments": {
+              "result_id": "q2"
+            },
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 0.07
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 9619,
+          "completion_tokens": 683,
+          "total_tokens": 10302
+        },
+        "analysis": "**结果**\n\n在数据的 `country` 表中，非洲国家的 `GovernmentForm` 有多种取值。按最常见的严格口径（`GovernmentForm = 'Republic'`）：\n\n- **非洲“Republic”国家的平均预期寿命 = 50.843 岁**，共 46 个国家，全部有 LifeExpectancy 数据（无空值）。\n\n**口径说明与不确定性**\n\n- “共和国”在数据中有三种写法：`Republic`（46 个非洲国家）、`Federal Republic`（2 个）、`Islamic Republic`（1 个）。若把名称中含 “Republic” 的都算作共和国（49 国），平均为 **51.061 岁**。\n- 平均值为未加权（每个国家等权重）的算术平均，而非按人口加权；如需按人口加权请告知。\n- 本数据为静态示例数据集（无年份信息），数值反映的是数据集快照状态，不能代表当前实际预期寿命。",
+        "trace": [
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型选择了 1 个工具",
+            "elapsed_ms": 990.2,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "inspect_schema",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 0.24,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型选择了 1 个工具",
+            "elapsed_ms": 1215.11,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "run_safe_sql",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 11.02,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型选择了 1 个工具",
+            "elapsed_ms": 1923.37,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "run_safe_sql",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 26.78,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型选择了 1 个工具",
+            "elapsed_ms": 823.94,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "select_result",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 0.07,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型输出最终答复",
+            "elapsed_ms": 1734.9,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          }
+        ],
+        "truncated": false,
+        "retry_count": 0
+      }
+    },
+    {
+      "index": 744,
+      "db_id": "world_1",
+      "question": "How many countries speak both English and Dutch?",
+      "reference_sql": "SELECT COUNT(*) FROM (SELECT T1.Name FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T2.Language  =  \"English\" INTERSECT SELECT T1.Name FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code  =  T2.CountryCode WHERE T2.Language  =  \"Dutch\")",
+      "eligible": true,
+      "reference_rows": [
+        [
+          3
+        ]
+      ],
+      "reference_duckdb_sql": "SELECT COUNT(*) FROM (SELECT T1.Name FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code = T2.CountryCode WHERE T2.Language = 'English' INTERSECT SELECT T1.Name FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code = T2.CountryCode WHERE T2.Language = 'Dutch')",
+      "passed": false,
+      "ordered": false,
+      "actual_rows": [
+        [
+          "ABW",
+          "Aruba",
+          "North America",
+          1,
+          1
+        ],
+        [
+          "CAN",
+          "Canada",
+          "North America",
+          1,
+          1
+        ],
+        [
+          "ANT",
+          "Netherlands Antilles",
+          "North America",
+          1,
+          1
+        ]
+      ],
+      "elapsed_seconds": 6.783,
+      "task": {
+        "status": "success",
+        "error_type": null,
+        "error": null,
+        "sql": "SELECT c.Code, c.Name, c.Continent, MAX(CASE WHEN cl.Language = 'English' THEN 1 ELSE 0 END) AS has_en, MAX(CASE WHEN cl.Language = 'Dutch' THEN 1 ELSE 0 END) AS has_nl FROM country AS c JOIN countrylanguage AS cl ON cl.CountryCode = c.Code GROUP BY c.Code, c.Name, c.Continent HAVING has_en = 1 AND has_nl = 1 ORDER BY c.Name LIMIT 500",
+        "selected_result_id": "q1",
+        "queries": [
+          {
+            "result_id": "q1",
+            "sql": "SELECT c.Code, c.Name, c.Continent, MAX(CASE WHEN cl.Language = 'English' THEN 1 ELSE 0 END) AS has_en, MAX(CASE WHEN cl.Language = 'Dutch' THEN 1 ELSE 0 END) AS has_nl FROM country AS c JOIN countrylanguage AS cl ON cl.CountryCode = c.Code GROUP BY c.Code, c.Name, c.Continent HAVING has_en = 1 AND has_nl = 1 ORDER BY c.Name LIMIT 500",
+            "columns": [
+              "Code",
+              "Name",
+              "Continent",
+              "has_en",
+              "has_nl"
+            ],
+            "data": [
+              {
+                "Code": "ABW",
+                "Name": "Aruba",
+                "Continent": "North America",
+                "has_en": 1,
+                "has_nl": 1
+              },
+              {
+                "Code": "CAN",
+                "Name": "Canada",
+                "Continent": "North America",
+                "has_en": 1,
+                "has_nl": 1
+              },
+              {
+                "Code": "ANT",
+                "Name": "Netherlands Antilles",
+                "Continent": "North America",
+                "has_en": 1,
+                "has_nl": 1
+              }
+            ],
+            "row_count": 3,
+            "truncated": false,
+            "elapsed_ms": 22.46
+          },
+          {
+            "result_id": "q2",
+            "sql": "SELECT cl.CountryCode, c.Name, cl.Language, cl.IsOfficial, cl.Percentage FROM countrylanguage AS cl JOIN country AS c ON c.Code = cl.CountryCode WHERE LOWER(cl.Language) LIKE '%eng%' OR LOWER(cl.Language) LIKE '%dut%' OR LOWER(cl.Language) LIKE '%flem%' ORDER BY c.Name, cl.Language LIMIT 500",
+            "columns": [
+              "CountryCode",
+              "Name",
+              "Language",
+              "IsOfficial",
+              "Percentage"
+            ],
+            "data": [
+              {
+                "CountryCode": "ASM",
+                "Name": "American Samoa",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 3.1
+              },
+              {
+                "CountryCode": "AIA",
+                "Name": "Anguilla",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 0.0
+              },
+              {
+                "CountryCode": "ATG",
+                "Name": "Antigua and Barbuda",
+                "Language": "Creole English",
+                "IsOfficial": "F",
+                "Percentage": 95.7
+              },
+              {
+                "CountryCode": "ATG",
+                "Name": "Antigua and Barbuda",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 0.0
+              },
+              {
+                "CountryCode": "ABW",
+                "Name": "Aruba",
+                "Language": "Dutch",
+                "IsOfficial": "T",
+                "Percentage": 5.3
+              },
+              {
+                "CountryCode": "ABW",
+                "Name": "Aruba",
+                "Language": "English",
+                "IsOfficial": "F",
+                "Percentage": 9.5
+              },
+              {
+                "CountryCode": "AUS",
+                "Name": "Australia",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 81.2
+              },
+              {
+                "CountryCode": "BHS",
+                "Name": "Bahamas",
+                "Language": "Creole English",
+                "IsOfficial": "F",
+                "Percentage": 89.7
+              },
+              {
+                "CountryCode": "BHR",
+                "Name": "Bahrain",
+                "Language": "English",
+                "IsOfficial": "F",
+                "Percentage": 0.0
+              },
+              {
+                "CountryCode": "BGD",
+                "Name": "Bangladesh",
+                "Language": "Bengali",
+                "IsOfficial": "T",
+                "Percentage": 97.7
+              },
+              {
+                "CountryCode": "BRB",
+                "Name": "Barbados",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 0.0
+              },
+              {
+                "CountryCode": "BEL",
+                "Name": "Belgium",
+                "Language": "Dutch",
+                "IsOfficial": "T",
+                "Percentage": 59.2
+              },
+              {
+                "CountryCode": "BLZ",
+                "Name": "Belize",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 50.8
+              },
+              {
+                "CountryCode": "BMU",
+                "Name": "Bermuda",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 100.0
+              },
+              {
+                "CountryCode": "BRN",
+                "Name": "Brunei",
+                "Language": "English",
+                "IsOfficial": "F",
+                "Percentage": 3.1
+              },
+              {
+                "CountryCode": "BRN",
+                "Name": "Brunei",
+                "Language": "Malay-English",
+                "IsOfficial": "F",
+                "Percentage": 28.8
+              },
+              {
+                "CountryCode": "CAN",
+                "Name": "Canada",
+                "Language": "Dutch",
+                "IsOfficial": "F",
+                "Percentage": 0.5
+              },
+              {
+                "CountryCode": "CAN",
+                "Name": "Canada",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 60.4
+              },
+              {
+                "CountryCode": "CYM",
+                "Name": "Cayman Islands",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 0.0
+              },
+              {
+                "CountryCode": "CXR",
+                "Name": "Christmas Island",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 0.0
+              },
+              {
+                "CountryCode": "CCK",
+                "Name": "Cocos (Keeling) Islands",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 0.0
+              },
+              {
+                "CountryCode": "COL",
+                "Name": "Colombia",
+                "Language": "Creole English",
+                "IsOfficial": "F",
+                "Percentage": 0.1
+              },
+              {
+                "CountryCode": "COK",
+                "Name": "Cook Islands",
+                "Language": "English",
+                "IsOfficial": "F",
+                "Percentage": 0.0
+              },
+              {
+                "CountryCode": "CRI",
+                "Name": "Costa Rica",
+                "Language": "Creole English",
+                "IsOfficial": "F",
+                "Percentage": 2.0
+              },
+              {
+                "CountryCode": "DNK",
+                "Name": "Denmark",
+                "Language": "English",
+                "IsOfficial": "F",
+                "Percentage": 0.3
+              },
+              {
+                "CountryCode": "DMA",
+                "Name": "Dominica",
+                "Language": "Creole English",
+                "IsOfficial": "F",
+                "Percentage": 100.0
+              },
+              {
+                "CountryCode": "FLK",
+                "Name": "Falkland Islands",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 0.0
+              },
+              {
+                "CountryCode": "GIB",
+                "Name": "Gibraltar",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 88.9
+              },
+              {
+                "CountryCode": "GRD",
+                "Name": "Grenada",
+                "Language": "Creole English",
+                "IsOfficial": "F",
+                "Percentage": 100.0
+              },
+              {
+                "CountryCode": "GUM",
+                "Name": "Guam",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 37.5
+              },
+              {
+                "CountryCode": "GUY",
+                "Name": "Guyana",
+                "Language": "Creole English",
+                "IsOfficial": "F",
+                "Percentage": 96.4
+              },
+              {
+                "CountryCode": "HND",
+                "Name": "Honduras",
+                "Language": "Creole English",
+                "IsOfficial": "F",
+                "Percentage": 0.2
+              },
+              {
+                "CountryCode": "HKG",
+                "Name": "Hong Kong",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 2.2
+              },
+              {
+                "CountryCode": "ISL",
+                "Name": "Iceland",
+                "Language": "English",
+                "IsOfficial": "F",
+                "Percentage": 0.0
+              },
+              {
+                "CountryCode": "IND",
+                "Name": "India",
+                "Language": "Bengali",
+                "IsOfficial": "F",
+                "Percentage": 8.2
+              },
+              {
+                "CountryCode": "IRL",
+                "Name": "Ireland",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 98.4
+              },
+              {
+                "CountryCode": "JAM",
+                "Name": "Jamaica",
+                "Language": "Creole English",
+                "IsOfficial": "F",
+                "Percentage": 94.2
+              },
+              {
+                "CountryCode": "JPN",
+                "Name": "Japan",
+                "Language": "English",
+                "IsOfficial": "F",
+                "Percentage": 0.1
+              },
+              {
+                "CountryCode": "KWT",
+                "Name": "Kuwait",
+                "Language": "English",
+                "IsOfficial": "F",
+                "Percentage": 0.0
+              },
+              {
+                "CountryCode": "LSO",
+                "Name": "Lesotho",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 0.0
+              },
+              {
+                "CountryCode": "MAC",
+                "Name": "Macao",
+                "Language": "English",
+                "IsOfficial": "F",
+                "Percentage": 0.5
+              },
+              {
+                "CountryCode": "MYS",
+                "Name": "Malaysia",
+                "Language": "English",
+                "IsOfficial": "F",
+                "Percentage": 1.6
+              },
+              {
+                "CountryCode": "MDV",
+                "Name": "Maldives",
+                "Language": "English",
+                "IsOfficial": "F",
+                "Percentage": 0.0
+              },
+              {
+                "CountryCode": "MLT",
+                "Name": "Malta",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 2.1
+              },
+              {
+                "CountryCode": "MHL",
+                "Name": "Marshall Islands",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 0.0
+              },
+              {
+                "CountryCode": "MCO",
+                "Name": "Monaco",
+                "Language": "English",
+                "IsOfficial": "F",
+                "Percentage": 6.5
+              },
+              {
+                "CountryCode": "MSR",
+                "Name": "Montserrat",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 0.0
+              },
+              {
+                "CountryCode": "NRU",
+                "Name": "Nauru",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 7.5
+              },
+              {
+                "CountryCode": "NLD",
+                "Name": "Netherlands",
+                "Language": "Dutch",
+                "IsOfficial": "T",
+                "Percentage": 95.6
+              },
+              {
+                "CountryCode": "ANT",
+                "Name": "Netherlands Antilles",
+                "Language": "Dutch",
+                "IsOfficial": "T",
+                "Percentage": 0.0
+              },
+              {
+                "CountryCode": "ANT",
+                "Name": "Netherlands Antilles",
+                "Language": "English",
+                "IsOfficial": "F",
+                "Percentage": 7.8
+              },
+              {
+                "CountryCode": "NZL",
+                "Name": "New Zealand",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 87.0
+              },
+              {
+                "CountryCode": "NIC",
+                "Name": "Nicaragua",
+                "Language": "Creole English",
+                "IsOfficial": "F",
+                "Percentage": 0.5
+              },
+              {
+                "CountryCode": "NIU",
+                "Name": "Niue",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 0.0
+              },
+              {
+                "CountryCode": "NFK",
+                "Name": "Norfolk Island",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 0.0
+              },
+              {
+                "CountryCode": "MNP",
+                "Name": "Northern Mariana Islands",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 4.8
+              },
+              {
+                "CountryCode": "NOR",
+                "Name": "Norway",
+                "Language": "English",
+                "IsOfficial": "F",
+                "Percentage": 0.5
+              },
+              {
+                "CountryCode": "PLW",
+                "Name": "Palau",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 3.2
+              },
+              {
+                "CountryCode": "PAN",
+                "Name": "Panama",
+                "Language": "Creole English",
+                "IsOfficial": "F",
+                "Percentage": 14.0
+              },
+              {
+                "CountryCode": "PRI",
+                "Name": "Puerto Rico",
+                "Language": "English",
+                "IsOfficial": "F",
+                "Percentage": 47.4
+              },
+              {
+                "CountryCode": "SHN",
+                "Name": "Saint Helena",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 0.0
+              },
+              {
+                "CountryCode": "KNA",
+                "Name": "Saint Kitts and Nevis",
+                "Language": "Creole English",
+                "IsOfficial": "F",
+                "Percentage": 100.0
+              },
+              {
+                "CountryCode": "KNA",
+                "Name": "Saint Kitts and Nevis",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 0.0
+              },
+              {
+                "CountryCode": "LCA",
+                "Name": "Saint Lucia",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 20.0
+              },
+              {
+                "CountryCode": "VCT",
+                "Name": "Saint Vincent and the Grenadines",
+                "Language": "Creole English",
+                "IsOfficial": "F",
+                "Percentage": 99.1
+              },
+              {
+                "CountryCode": "VCT",
+                "Name": "Saint Vincent and the Grenadines",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 0.0
+              },
+              {
+                "CountryCode": "WSM",
+                "Name": "Samoa",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 0.6
+              },
+              {
+                "CountryCode": "WSM",
+                "Name": "Samoa",
+                "Language": "Samoan-English",
+                "IsOfficial": "F",
+                "Percentage": 52.0
+              },
+              {
+                "CountryCode": "SYC",
+                "Name": "Seychelles",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 3.8
+              },
+              {
+                "CountryCode": "ZAF",
+                "Name": "South Africa",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 8.5
+              },
+              {
+                "CountryCode": "TKL",
+                "Name": "Tokelau",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 0.0
+              },
+              {
+                "CountryCode": "TON",
+                "Name": "Tonga",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 0.0
+              },
+              {
+                "CountryCode": "TTO",
+                "Name": "Trinidad and Tobago",
+                "Language": "Creole English",
+                "IsOfficial": "F",
+                "Percentage": 2.9
+              },
+              {
+                "CountryCode": "TTO",
+                "Name": "Trinidad and Tobago",
+                "Language": "English",
+                "IsOfficial": "F",
+                "Percentage": 93.5
+              },
+              {
+                "CountryCode": "TUN",
+                "Name": "Tunisia",
+                "Language": "Arabic-French-English",
+                "IsOfficial": "F",
+                "Percentage": 3.2
+              },
+              {
+                "CountryCode": "TCA",
+                "Name": "Turks and Caicos Islands",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 0.0
+              },
+              {
+                "CountryCode": "TUV",
+                "Name": "Tuvalu",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 0.0
+              },
+              {
+                "CountryCode": "GBR",
+                "Name": "United Kingdom",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 97.3
+              },
+              {
+                "CountryCode": "USA",
+                "Name": "United States",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 86.2
+              },
+              {
+                "CountryCode": "UMI",
+                "Name": "United States Minor Outlying Islands",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 0.0
+              },
+              {
+                "CountryCode": "VUT",
+                "Name": "Vanuatu",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 28.3
+              },
+              {
+                "CountryCode": "VGB",
+                "Name": "Virgin Islands, British",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 0.0
+              },
+              {
+                "CountryCode": "VIR",
+                "Name": "Virgin Islands, U.S.",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 81.7
+              },
+              {
+                "CountryCode": "ZMB",
+                "Name": "Zambia",
+                "Language": "Nsenga",
+                "IsOfficial": "F",
+                "Percentage": 4.3
+              },
+              {
+                "CountryCode": "ZWE",
+                "Name": "Zimbabwe",
+                "Language": "English",
+                "IsOfficial": "T",
+                "Percentage": 2.2
+              }
+            ],
+            "row_count": 85,
+            "truncated": false,
+            "elapsed_ms": 19.53
+          }
+        ],
+        "tool_calls": [
+          {
+            "name": "inspect_schema",
+            "arguments": {},
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 0.1
+          },
+          {
+            "name": "run_safe_sql",
+            "arguments": {
+              "sql": "SELECT c.Code, c.Name, c.Continent,\n       MAX(CASE WHEN cl.Language = 'English' THEN 1 ELSE 0 END) AS has_en,\n       MAX(CASE WHEN cl.Language = 'Dutch' THEN 1 ELSE 0 END) AS has_nl\nFROM country c JOIN countrylanguage cl ON cl.CountryCode = c.Code\nGROUP BY c.Code, c.Name, c.Continent\nHAVING has_en = 1 AND has_nl = 1\nORDER BY c.Name"
+            },
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 30.34
+          },
+          {
+            "name": "run_safe_sql",
+            "arguments": {
+              "sql": "SELECT cl.CountryCode, c.Name, cl.Language, cl.IsOfficial, cl.Percentage\nFROM countrylanguage cl JOIN country c ON c.Code = cl.CountryCode\nWHERE lower(cl.Language) LIKE '%eng%' OR lower(cl.Language) LIKE '%dut%' OR lower(cl.Language) LIKE '%flem%'\nORDER BY c.Name, cl.Language"
+            },
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 26.03
+          },
+          {
+            "name": "select_result",
+            "arguments": {
+              "result_id": "q1"
+            },
+            "status": "ok",
+            "error_type": null,
+            "elapsed_ms": 0.07
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 10237,
+          "completion_tokens": 726,
+          "total_tokens": 10963
+        },
+        "analysis": "**3 个国家。**\n\n统计口径：在 `countrylanguage` 中，同一国家至少有 1 条 `Language = 'English'` 记录，且至少有 1 条 `Language = 'Dutch'` 记录（不区分是否为官方语言、不设使用比例门槛，精确匹配语言名，因此不含 “Creole English” 等变体）。\n\n| 国家 | 代码 | 大洲 |\n|---|---|---|\n| Aruba | ABW | North America |\n| Canada | CAN | North America |\n| Netherlands Antilles | ANT | North America |\n\n不确定性说明：\n- Belgium 有荷兰语（Dutch 59.2%，官方）但没有 English 记录；Netherlands 也无 English 记录，因此不计入。若改用 “含有英语系语言” 或要求英语为官方语言，结果会不同：前 3 国中 English 均为非官方语言（Aruba 9.5%、Canada 等），即没有国家同时把英语和荷兰语列为官方语言。\n- 结论基于该数据集的语言清单，可能与现实情况有差异。",
+        "trace": [
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型选择了 1 个工具",
+            "elapsed_ms": 771.24,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "inspect_schema",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 0.1,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型选择了 1 个工具",
+            "elapsed_ms": 1439.18,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "run_safe_sql",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 30.34,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型选择了 1 个工具",
+            "elapsed_ms": 1240.85,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "run_safe_sql",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 26.03,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型选择了 1 个工具",
+            "elapsed_ms": 1161.48,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "select_result",
+            "status": "ok",
+            "detail": "ok",
+            "elapsed_ms": 0.07,
+            "engine": null,
+            "query_elapsed_ms": null
+          },
+          {
+            "node": "agent_model",
+            "status": "ok",
+            "detail": "模型输出最终答复",
+            "elapsed_ms": 2091.25,
+            "engine": "openai-compatible",
+            "query_elapsed_ms": null
+          }
+        ],
+        "truncated": false,
+        "retry_count": 0
+      }
+    },
+    {
+      "index": 817,
+      "db_id": "world_1",
+      "question": "What are the country codes of the different countries, and what are the languages spoken by the greatest percentage of people for each?",
+      "reference_sql": "SELECT LANGUAGE ,  CountryCode ,  max(Percentage) FROM countrylanguage GROUP BY CountryCode",
+      "eligible": false,
+      "exclusion": "BinderException: Binder Error: column \"LANGUAGE\" must appear in the GROUP BY clause or must be part of an aggregate function.\nEither add it to the GROUP BY list, or use ANY_VALUE(\"LANGUAGE\") if the exact value of \"LANGUAGE\" is not important.\n\nLINE 1: SELECT LANGUAGE, CountryCode, MAX(Percentage) FROM countrylanguage"
+    },
+    {
+      "index": 844,
+      "db_id": "orchestra",
+      "question": "Show the name of the conductor that has conducted the most number of orchestras.",
+      "reference_sql": "SELECT T1.Name FROM conductor AS T1 JOIN orchestra AS T2 ON T1.Conductor_ID  =  T2.Conductor_ID GROUP BY T2.Conductor_ID ORDER BY COUNT(*) DESC LIMIT 1",
+      "eligible": false,
+      "exclusion": "BinderException: Binder Error: column \"Name\" must appear in the GROUP BY clause or must be part of an aggregate function.\nEither add it to the GROUP BY list, or use ANY_VALUE(\"Name\") if the exact value of \"Name\" is not important.\n\nLINE 1: SELECT T1.Name FROM conductor AS T1 JOIN orchestra AS T2 ON T1...\n            "
+    },
+    {
+      "index": 885,
+      "db_id": "network_1",
+      "question": "What are the names of the high schoolers and how many friends does each have?",
+      "reference_sql": "SELECT T2.name ,  count(*) FROM Friend AS T1 JOIN Highschooler AS T2 ON T1.student_id  =  T2.id GROUP BY T1.student_id",
+      "eligible": false,
+      "exclusion": "BinderException: Binder Error: column \"name\" must appear in the GROUP BY clause or must be part of an aggregate function.\nEither add it to the GROUP BY list, or use ANY_VALUE(\"name\") if the exact value of \"name\" is not important.\n\nLINE 1: SELECT T2.name, COUNT(*) FROM Friend AS T1 JOIN Highschooler AS...\n           "
+    },
+    {
+      "index": 923,
+      "db_id": "dog_kennels",
+      "question": "Find the id, last name and cell phone of the professionals who live in the state of Indiana or have performed more than two treatments.",
+      "reference_sql": "SELECT professional_id ,  last_name ,  cell_number FROM Professionals WHERE state  =  'Indiana' UNION SELECT T1.professional_id ,  T1.last_name ,  T1.cell_number FROM Professionals AS T1 JOIN Treatments AS T2 ON T1.professional_id  =  T2.professional_id GROUP BY T1.professional_id HAVING count(*)  >  2",
+      "eligible": false,
+      "exclusion": "BinderException: Binder Error: column \"last_name\" must appear in the GROUP BY clause or must be part of an aggregate function.\nEither add it to the GROUP BY list, or use ANY_VALUE(\"last_name\") if the exact value of \"last_name\" is not important.\n\nLINE 1: ... WHERE state = 'Indiana' UNION SELECT T1.professional_id, T1"
+    },
+    {
+      "index": 947,
+      "db_id": "dog_kennels",
+      "question": "What are the date and the operating professional's first name of each treatment?",
+      "reference_sql": "SELECT T1.date_of_treatment ,  T2.first_name FROM Treatments AS T1 JOIN Professionals AS T2 ON T1.professional_id  =  T2.professional_id",
+      "eligible": false,
+      "exclusion": "ValueError: sqlite_duckdb_reference_mismatch"
+    },
+    {
+      "index": 985,
+      "db_id": "dog_kennels",
+      "question": "What are the dog name, age and weight of the dogs that were abandoned? Note that 1 stands for yes, and 0 stands for no in the tables.",
+      "reference_sql": "SELECT name ,  age ,  weight FROM Dogs WHERE abandoned_yn  =  1",
+      "eligible": false,
+      "exclusion": "ValueError: sqlite_duckdb_reference_mismatch"
+    }
+  ],
+  "retry_source_sha256": "f5ac9b826f97112b0ad008a2b2c308c260b1a892785d8763dfd257f27321a0a7",
+  "retry_reason": "Precheck only: SQLite double-quoted string fallback translated; original SQLite result still verified.",
+  "sample_frame_size": 1034,
+  "excluded_prior_indices": [],
+  "selected_indices": [
+    93,
+    131,
+    170,
+    198,
+    205,
+    213,
+    216,
+    430,
+    433,
+    440,
+    470,
+    599,
+    625,
+    632,
+    665,
+    679,
+    710,
+    725,
+    744,
+    817,
+    844,
+    885,
+    923,
+    947,
+    985
+  ],
+  "finished_utc": "2026-11-01T07:27:49.759159+00:00"
+}
