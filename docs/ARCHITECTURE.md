@@ -80,7 +80,7 @@ REPOSITORY_BACKEND=postgres POSTGRES_DSN=... pytest -q
 
 ### 问题
 
-"销售额"这三个字，模型可能写成 `SUM(amount)`、`SUM(amount*quantity)`、`AVG(amount)`、`SUM(amount) - SUM(refund)`。SQL 都能跑，口径完全不同。评测里"执行成功但结果错"大多来自这里。
+"销售额"这三个字，模型可能写成 `SUM(amount)`、`SUM(amount*quantity)`、`AVG(amount)`、`SUM(amount) - SUM(refund)`。这些表达式采用不同的计算口径。
 
 ### 方案
 
@@ -145,9 +145,7 @@ key 为空 -> owner_id = "anonymous"
 
 恢复时使用用户、数据集和任务派生的线程标识，并检查会话版本和任务锁；若图已完成但结果尚未保存，直接补存已有结果。正在执行时中断的节点可能重放，调用预算保留而时间预算按恢复后的运行重新计算；这不是恰好一次执行或跨机器高可用方案。检查点可能包含用户数据，删除会话不会自动删除检查点，可通过任务检查点删除接口单独清理。
 
-## 8. 已知取舍
+## 8. 存储与报告设计
 
 - **`tasks.payload` 用 JSONB 整体存**：字段多且会演进，逐字段建列维护成本高。常用过滤字段（owner/dataset/status/elapsed）额外冗余成列并建索引，兼顾查询与灵活。
 - **报告按需生成**：分析结束时只保存任务；用户预览或下载时才生成并保存 Markdown，后续请求复用。生成过程无需额外调用大模型。
-- **few-shot 只做存储不做注入**：当前没有接入实际 Agent 路径，也没有做收益评测。
-- **不做自动纠偏**：见第 4 节。
