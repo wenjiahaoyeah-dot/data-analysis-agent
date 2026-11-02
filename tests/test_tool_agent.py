@@ -200,7 +200,7 @@ def test_api_persists_clarification_and_isolates_sessions(isolated_storage, demo
         assert get_repository().get_report(resumed["task_id"]) is None
         assert any(m.get("tool_call_id") == "call_1" for m in llm.seen[1])
         assert llm.seen[1][-1] == {"role": "user", "content": "按行数"}
-        assert get_repository().get_conversation(session)["version"] == 2
+        assert get_repository().get_conversation(session)["version"] == 3
         sessions = client.get(f"/api/conversations?dataset_id={demo_dataset.dataset_id}").json()["items"]
         assert session in [s["session_id"] for s in sessions]
         restored = client.get(f"/api/conversations/{session}").json()
@@ -398,7 +398,7 @@ def test_graph_exception_becomes_failed_task(demo_dataset, demo_db, monkeypatch)
         def add_conditional_edges(self, *a, **k):
             return self
 
-        def compile(self):
+        def compile(self, **kwargs):
             class _Compiled:
                 def invoke(self, *a, **k):
                     raise RuntimeError("boom")
@@ -419,10 +419,10 @@ def test_graph_exception_preserves_completed_observations(demo_dataset, demo_db,
         def add_node(self, name, fn): self.nodes[name] = fn
         def add_edge(self, *args): pass
         def add_conditional_edges(self, *args): pass
-        def compile(self):
+        def compile(self, **kwargs):
             nodes = self.nodes
             class Compiled:
-                def invoke(self, state, config):
+                def invoke(self, state, config, **kwargs):
                     state = nodes['model'](state)
                     nodes['tools'](state)
                     raise RuntimeError('after tool')

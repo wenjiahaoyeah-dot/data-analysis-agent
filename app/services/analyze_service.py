@@ -9,9 +9,11 @@ import json
 from datetime import datetime
 from typing import Any
 
+from app.agent.checkpoints import CheckpointUnavailable, task_lock
 from app.agent.tool_agent import run_tool_agent
 from app.agent.llm import get_llm
 from app.repository.models import ANONYMOUS_USER
+from app.repository.base import RepositoryConflict
 from app.repository.factory import get_repository
 from app.services import task_store
 from app.services.upload_service import get_db, load_meta
@@ -37,17 +39,35 @@ def run_analysis(
     owner_id: str = ANONYMOUS_USER,
     mode: str = "agent",
     session_id: str | None = None,
+    resume: bool = False,
 ) -> dict[str, Any]:
     """执行一次自然语言分析，返回可直接序列化的任务字典。"""
+    task_id = task_id or uuid.uuid4().hex[:12]
+    with task_lock(task_id):
+        return _run_analysis(dataset_id, question, task_id, owner_id, mode, session_id, resume)
+
+
+def _run_analysis(dataset_id: str, question: str, task_id: str, owner_id: str,
+                  mode: str, session_id: str | None, resume: bool) -> dict[str, Any]:
     if mode != "agent":
         raise ValueError("仅支持自主工具 Agent")
     meta = load_meta(dataset_id)  # 不存在时抛 FileNotFoundError
     db = get_db(dataset_id)
 
-    task_id = task_id or uuid.uuid4().hex[:12]
     created_at = datetime.now().isoformat(timespec="seconds")
 
     repo = get_repository()
+    previous_task = repo.get_task(task_id) if resume else None
+    if resume:
+        if not previous_task or previous_task.get("owner_id") != owner_id or previous_task.get("dataset_id") != dataset_id:
+            raise ConversationNotFound("任务不存在")
+        if previous_task.get("status") != "running" and previous_task.get("error_type") != "graph_error":
+            raise CheckpointUnavailable("任务已结束，不能恢复")
+        question = previous_task["question"]
+        session_id = previous_task.get("session_id")
+        created_at = previous_task["created_at"]
+        if not session_id or previous_task.get("checkpoint_conversation_version") is None:
+            raise CheckpointUnavailable("该任务没有可恢复的会话记录")
     if session_id:
         conversation = repo.get_conversation(session_id)
         if not conversation or conversation.get("owner_id") != owner_id or conversation.get("dataset_id") != dataset_id:
@@ -56,9 +76,22 @@ def run_analysis(
         session_id = uuid.uuid4().hex
         conversation = {"session_id": session_id, "owner_id": owner_id, "dataset_id": dataset_id,
                         "turns": [], "task_ids": [], "version": 0, "created_at": created_at}
+        # 先保存会话身份，进程异常退出后才能授权恢复尚未完成的首轮任务。
+        repo.save_conversation(conversation, expected_version=0)
+        conversation["version"] = 1
+    if resume and conversation.get("version", 0) != previous_task.get("checkpoint_conversation_version"):
+        raise RepositoryConflict("会话在任务中断后已更新，不能恢复旧状态")
     turns = _history_turns(conversation.get("turns") or [])
     history = [message for turn in turns for message in turn]
-    final = run_tool_agent(db, meta, question, task_id, owner_id, history=history, repo=repo)
+    if not resume:
+        # 图执行前登记任务，服务重启后可通过任务列表找到未完成工作。
+        task_store.save_task({"task_id": task_id, "dataset_id": dataset_id, "owner_id": owner_id,
+            "question": question, "status": "running", "mode": mode, "session_id": session_id,
+            "created_at": created_at, "checkpoint_conversation_version": conversation.get("version", 0)})
+    kwargs = {"history": history, "repo": repo}
+    if resume:
+        kwargs["resume"] = True
+    final = run_tool_agent(db, meta, question, task_id, owner_id, **kwargs)
     new_turn = final["messages"][len(history):]
     conversation["turns"] = _history_turns([*turns, new_turn])
     conversation["task_ids"] = [*(conversation.get("task_ids") or []), task_id][-20:]
@@ -136,12 +169,13 @@ def run_analysis(
         "llm_mode": final.get("llm_mode") or get_llm().name,
         "model_name": final.get("model_name") or getattr(get_llm(), "model", get_llm().name),
         "created_at": created_at,
+        "checkpoint_conversation_version": pending_conversation.get("version", 0),
         "dataset_files": meta.get("files", []),
     }
 
     task_store.save_task(task)
 
-    if pending_conversation is not None:
+    if pending_conversation is not None and final.get("error_type") != "graph_error":
         # 任务已落库，再更新会话；冲突要如实返回 409 让调用方重试
         repo.save_conversation(
             pending_conversation,

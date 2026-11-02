@@ -394,11 +394,41 @@ def sidebar() -> dict | None:
                         if st.session_state.session_id == session_to_delete:
                             _clear_conversation()
                         st.rerun()
-                    st.caption("删除会话记忆不会删除已保存的任务、报告或审计记录。")
+                    st.caption("删除会话记忆不会删除任务、报告、审计或检查点；检查点可能包含原会话内容。")
                 else:
                     st.caption("当前数据集还没有历史会话。")
             except Exception as exc:
                 st.caption(f"会话读取失败：{exc}")
+        with st.sidebar.expander("恢复中断的分析任务"):
+            try:
+                tasks = api_get("/api/tasks?limit=50").get("items", [])
+                candidates = [t for t in tasks if t.get("dataset_id") == dataset["dataset_id"] and
+                              (t.get("status") == "running" or t.get("error_type") == "graph_error")]
+                if not candidates:
+                    st.caption("当前数据集没有待恢复任务。")
+                else:
+                    choices = {f"{t.get('created_at', '')[:16]} · {t.get('question', '')[:30]} · {t['task_id']}": t
+                               for t in candidates}
+                    selected = st.selectbox("选择任务", list(choices), key="resume_task_select")
+                    if st.button("从检查点继续", key="resume_task_button"):
+                        original = choices[selected]
+                        with st.spinner("正在从检查点恢复…"):
+                            restored = api_post(f"/api/task/{original['task_id']}/resume")
+                        if st.session_state.session_id != restored.get("session_id"):
+                            _clear_conversation()
+                            if restored.get("status") != "failed" and restored.get("session_id"):
+                                saved = api_get(f"/api/conversations/{restored['session_id']}")
+                                st.session_state.history = saved.get("items", [])
+                        st.session_state.session_id = restored.get("session_id")
+                        existing = next((h for h in st.session_state.history
+                                         if h.get("result", {}).get("task_id") == original['task_id']), None)
+                        if existing:
+                            existing["result"] = restored
+                        else:
+                            st.session_state.history.append({"question": original.get("question", ""), "result": restored})
+                        st.rerun()
+            except Exception as exc:
+                st.caption(f"任务恢复不可用：{exc}")
     st.sidebar.divider()
     st.sidebar.subheader("2. 试试这些问题")
     for i, example in enumerate(EXAMPLES):

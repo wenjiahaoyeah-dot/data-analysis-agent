@@ -10,6 +10,7 @@ from typing import Any, TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
+from app.agent.checkpoints import CheckpointUnavailable, checkpoint_thread_id, open_checkpointer
 from app.agent.llm import LLMError, get_llm
 from app.config import settings
 from app.repository.models import AuditRecord
@@ -189,8 +190,9 @@ def _merge_checks(checks: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def run_tool_agent(db, meta: dict[str, Any], question: str, task_id: str, owner_id: str,
-                   history: list[dict[str, Any]] | None = None, llm=None, repo=None) -> dict[str, Any]:
-    """每次请求构建一次图；对话以完整轮次由调用方持久化，不保存图内中间快照。"""
+                   history: list[dict[str, Any]] | None = None, llm=None, repo=None,
+                   resume: bool = False) -> dict[str, Any]:
+    """运行或从同一任务的持久化检查点恢复模型/工具图。"""
     from app.repository.factory import get_repository
 
     repo = repo or get_repository()
@@ -431,11 +433,35 @@ def run_tool_agent(db, meta: dict[str, Any], question: str, task_id: str, owner_
         "clarification": None, "usage": {}, "model_calls": 0, "sql_calls": 0, "retry_count": 0, "pending_repair": False, "status": "running",
         "error": "", "error_type": "", "answer": "", "signatures": [], "evidence": False,
         "schema_ready": False, "selected_result_id": None}
+    config = {"recursion_limit": max_models * 2 + 3,
+              "configurable": {"thread_id": checkpoint_thread_id(owner_id, meta["dataset_id"], task_id)}}
     try:
-        result = graph.compile().invoke(initial, config={"recursion_limit": max_models * 2 + 3})
+        with open_checkpointer() as checkpointer:
+            compiled = graph.compile(checkpointer=checkpointer)
+            if resume:
+                snapshot = compiled.get_state(config)
+                if snapshot.next:
+                    result = compiled.invoke(None, config=config, durability="sync")
+                elif snapshot.values and snapshot.values.get("status") in {"success", "failed", "needs_clarification"}:
+                    # 图已完成但结果尚未落库时，直接使用最终快照完成落库，避免重放调用。
+                    result = snapshot.values
+                else:
+                    raise CheckpointUnavailable("该任务没有可恢复的图步骤")
+            else:
+                result = compiled.invoke(initial, config=config, durability="sync")
+    except CheckpointUnavailable:
+        raise
     except Exception as exc:
         # GraphRecursionError 等要收敛成可读的任务失败，不能让请求变 500
         elapsed = round((time.monotonic() - started) * 1000, 2)
+        if resume and not latest_state:
+            try:
+                with open_checkpointer() as checkpointer:
+                    snapshot = graph.compile(checkpointer=checkpointer).get_state(config)
+                    if snapshot.values:
+                        latest_state.update(deepcopy(snapshot.values))
+            except Exception:
+                pass  # 尽力保留快照；原始异常仍然作为任务错误返回。
         saved = latest_state or initial
         return {
             **initial,
@@ -474,10 +500,11 @@ def run_tool_agent(db, meta: dict[str, Any], question: str, task_id: str, owner_
 
     if settings.audit_enabled:
         try:
-            repo.append_audit(AuditRecord(task_id=task_id, dataset_id=meta["dataset_id"], owner_id=owner_id,
-                question=question, sql=audit_sql, status=result["status"],
-                error_type=result.get("error_type") or None, retry_count=result["retry_count"],
-                row_count=total_rows, elapsed_ms=elapsed, metric_check=check))
+            if not resume or not repo.audit_exists(task_id, owner_id):
+                repo.append_audit(AuditRecord(task_id=task_id, dataset_id=meta["dataset_id"], owner_id=owner_id,
+                    question=question, sql=audit_sql, status=result["status"],
+                    error_type=result.get("error_type") or None, retry_count=result["retry_count"],
+                    row_count=total_rows, elapsed_ms=elapsed, metric_check=check))
         except Exception:
             result["trace"].append({"node": "audit", "status": "warn", "detail": "审计写入失败", "elapsed_ms": 0})
     return {**result, "elapsed_ms": elapsed, "metric_check": check, "llm_mode": llm.name,

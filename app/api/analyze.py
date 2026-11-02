@@ -8,6 +8,8 @@ from app.api.deps import get_current_user, get_repo
 from app.config import settings
 from app.repository.models import User
 from app.repository.base import RepositoryConflict
+from app.agent.checkpoints import (CheckpointUnavailable, TaskBusy, checkpoint_thread_id,
+                                   open_checkpointer, task_lock)
 from app.schemas.response import AnalyzeRequest, AnalyzeResponse, TaskStatusResponse
 from app.services.analyze_service import ConversationNotFound, run_analysis
 
@@ -98,6 +100,48 @@ async def get_task(task_id: str, user: User = Depends(get_current_user)):
     )
 
 
+@router.post("/task/{task_id}/resume", response_model=AnalyzeResponse, summary="从中断检查点恢复分析任务")
+async def resume_task(task_id: str = Path(pattern=r"^[0-9a-f]{12}$"), user: User = Depends(get_current_user)):
+    repo = get_repo()
+    task = await run_in_threadpool(repo.get_task, task_id)
+    if not task or task.get("owner_id") != user.id:
+        raise HTTPException(status_code=404, detail="任务不存在")
+    meta = await run_in_threadpool(repo.get_dataset, task.get("dataset_id"))
+    if not meta or meta.owner_id != user.id:
+        raise HTTPException(status_code=404, detail="任务不存在")
+    if settings.use_mock_llm:
+        raise HTTPException(status_code=400, detail="恢复任务需要配置支持工具调用的模型")
+    try:
+        return await run_in_threadpool(run_analysis, task["dataset_id"], task["question"], task_id,
+                                       user.id, "agent", task.get("session_id"), True)
+    except (CheckpointUnavailable, TaskBusy, RepositoryConflict) as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except ConversationNotFound as exc:
+        raise HTTPException(status_code=404, detail="任务或会话不存在") from exc
+
+
+@router.delete("/task/{task_id}/checkpoint", summary="删除某个任务的检查点")
+async def delete_task_checkpoint(task_id: str = Path(pattern=r"^[0-9a-f]{12}$"),
+                                 user: User = Depends(get_current_user)):
+    repo = get_repo()
+    task = await run_in_threadpool(repo.get_task, task_id)
+    if not task or task.get("owner_id") != user.id:
+        raise HTTPException(status_code=404, detail="任务不存在")
+    meta = await run_in_threadpool(repo.get_dataset, task.get("dataset_id"))
+    if not meta or meta.owner_id != user.id:
+        raise HTTPException(status_code=404, detail="任务不存在")
+
+    def delete():
+        with task_lock(task_id), open_checkpointer() as saver:
+            saver.delete_thread(checkpoint_thread_id(user.id, task["dataset_id"], task_id))
+
+    try:
+        await run_in_threadpool(delete)
+    except TaskBusy as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    return {"deleted": True}
+
+
 @router.get("/tasks", summary="列出当前租户最近的分析任务")
 async def list_tasks(limit: int = 20, user: User = Depends(get_current_user)):
     items = await run_in_threadpool(get_repo().list_tasks, limit, user.id)
@@ -107,6 +151,7 @@ async def list_tasks(limit: int = 20, user: User = Depends(get_current_user)):
                 "task_id": t["task_id"],
                 "question": t["question"],
                 "status": t["status"],
+                "error_type": t.get("error_type"),
                 "dataset_id": t["dataset_id"],
                 "created_at": t["created_at"],
                 "elapsed_ms": t.get("elapsed_ms", 0.0),

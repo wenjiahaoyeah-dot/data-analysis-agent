@@ -412,6 +412,12 @@ class PostgresRepository:
         record.id = row["id"] if row else None
         return record
 
+    def audit_exists(self, task_id: str, owner_id: str) -> bool:
+        with self._cursor() as cur:
+            cur.execute("SELECT 1 FROM query_logs WHERE task_id = %s AND owner_id = %s LIMIT 1",
+                        (task_id, owner_id))
+            return cur.fetchone() is not None
+
     def list_audits(
         self,
         owner_id: str | None = None,

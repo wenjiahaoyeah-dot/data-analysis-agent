@@ -331,6 +331,9 @@ def test_append_and_list_audits(repo):
     assert len(mine) == 2
     assert mine[0].task_id == "t2"  # 倒序
     assert all(r.owner_id == "u_a" for r in mine)
+    assert repo.audit_exists("t1", "u_a")
+    assert not repo.audit_exists("t1", "u_b")
+    assert not repo.audit_exists("missing", "u_a")
 
 
 def test_audit_stats(repo):

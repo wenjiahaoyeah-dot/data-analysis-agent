@@ -106,6 +106,8 @@ class MetadataRepository(Protocol):
     # ---- 审计 ----
     def append_audit(self, record: AuditRecord) -> AuditRecord: ...
 
+    def audit_exists(self, task_id: str, owner_id: str) -> bool: ...
+
     def list_audits(
         self,
         owner_id: str | None = None,

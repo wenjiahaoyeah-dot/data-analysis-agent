@@ -325,6 +325,11 @@ class JsonRepository:
             self._write_json(self._collection("audits"), raw)
             return record
 
+    def audit_exists(self, task_id: str, owner_id: str) -> bool:
+        with self._lock:
+            return any(d.get("task_id") == task_id and d.get("owner_id") == owner_id
+                       for d in self._read_json(self._collection("audits"), []))
+
     def list_audits(
         self,
         owner_id: str | None = None,
